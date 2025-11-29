@@ -1,0 +1,43 @@
+﻿<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+
+        @if (TempData["SuccessToast"] != null)
+        {
+            <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <span class="text-light">@Html.Raw(((string)TempData["SuccessToast"]!).Replace("\n", "<br />"))</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        }
+
+        @if (TempData["WarnToast"] != null)
+        {
+            <div class="toast align-items-center text-bg-warning border-0 show" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <span class="text-light">@Html.Raw(((string)TempData["WarnToast"]!).Replace("\n", "<br />"))</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorToast"] != null)
+        {
+            <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <span class="text-light">@Html.Raw(((string)TempData["ErrorToast"]!).Replace("\n", "<br />"))</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

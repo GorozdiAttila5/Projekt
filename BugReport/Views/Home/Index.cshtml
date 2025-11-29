@@ -1,0 +1,12 @@
+﻿@using BugReport.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> userManager
+@inject RoleManager<IdentityRole> roleManager
+
+@{
+    var user = await userManager.GetUserAsync(User);
+}
+
+<div class="main-card">
+    <h1 class="title-text text-center">Welcome, @user?.FirstName @user?.LastName!</h1>
+</div>

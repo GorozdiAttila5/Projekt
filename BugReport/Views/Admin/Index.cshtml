@@ -1,0 +1,87 @@
+﻿@using BugReport.Models.Admin
+@model List<UserRoleViewModel>
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="main-card">
+    <form asp-controller="Admin" asp-action="Index" method="get">
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-md-6">
+                <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="Search users..." />
+            </div>
+
+            <div class="col-auto d-flex justify-content-start justify-content-md-center gap-3">
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark-blue px-4 dropdown-toggle" type="button" id="roleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter Role
+                    </button>
+                    <ul class="dropdown-menu p-3" aria-labelledby="roleDropdown" style="min-width:200px;">
+                        @foreach (var role in ViewBag.Roles)
+                        {
+                            <li>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles" value="@role" id="role_@role">
+                                    <label class="form-check-label" for="role_@role">@role</label>
+                                </div>
+                            </li>
+                        }
+                        <li class="dropdown-divider"></li>
+                        <button type="submit" class="btn btn-dark-blue px-4 w-100">Filter</button>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive mt-4">
+        <table class="table align-middle report-table">
+            <thead class="px-2 mt-4">
+                <tr>
+                    <th>User name</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model is not null && Model.Any())
+                {
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.User.UserName</td>
+                            <td>@user.User.FirstName @user.User.LastName</td>
+                            <td class="align-items-center">
+                                <form asp-controller="Admin" asp-action="ChangeUserRole" method="post" class="d-flex align-items-center gap-2">
+                                    <input type="hidden" name="userId" value="@user.User.Id" />
+
+                                    <select name="newRole" class="form-select form-select-sm p-2">
+                                        @foreach (var role in ViewBag.Roles)
+                                        {
+                                            @if (user.Roles.Contains(role))
+                                            {
+                                                <option value="@role" selected>@role</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@role">@role</option>
+                                            }
+                                        }
+                                    </select>
+
+                                    <button type="submit" class="btn btn-dark-blue px-2">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="100%" class="title-text text-center">No user found</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

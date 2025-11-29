@@ -1,0 +1,245 @@
+:root {
+    --main-color: #1C2542;
+    --main-color-active: #151C31;
+}
+
+* {
+    font-family: url(~/font/Roboto/Roboto-Regular.ttf);
+}
+
+body {
+    background: #f9f9f9;
+    min-height: 100vh;
+    min-width: 100vw;
+}
+
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+}
+
+.account-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    width: 650px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+.main-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 1400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+a {
+    color: var(--main-color);
+    text-decoration: underline;
+}
+
+img {
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 450px;
+    background: #ffffff;
+    border-right: 1px solid #dddddd;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1051;
+}
+
+.sidebar.show {
+    transform: translateX(0)
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    background: rgba(28,37,66,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1050;
+}
+
+.sidebar.show + .sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.navbar-toggler {
+    display: block;
+    border: hidden;
+}
+
+.navbar-expand-lg .navbar-toggler {
+    display: block;
+}
+
+.title-text {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--main-color);
+    line-height: 1.1;
+}
+
+.btn-dark-blue {
+    background: var(--main-color);
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+.btn-dark-blue:hover {
+    background: var(--main-color-active);
+    font-weight: 500;
+    color:#ffffff;
+}
+
+.btn-outline-dark-blue {
+    background: #ffffff;
+    border-color: var(--main-color);
+    font-weight: 500;
+    color: var(--main-color);
+    font-size: 1.1rem;
+}
+
+.btn-outline-dark-blue:hover {
+    background: var(--main-color);
+    font-weight: 500;
+    color: #ffffff;
+}
+
+
+
+.assignee-selector{
+    position: relative;
+    width: 100%;
+}
+
+#assignee-tag-container {
+    min-height: 42px;
+    cursor: text;
+    background: #ffffff;
+}
+
+#assignee-tag-container input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#assignee-tag-container .assignee-placeholder {
+    color: #6C757D;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.tag {
+    cursor: pointer;
+    background: var(--main-color);
+    color: #ffffff;
+    padding: 5px 20px;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.tag .remove-tag {
+    margin-left:6px;
+    line-height: 1;
+}
+
+.tag .remove-tag:hover {
+    color: #D3D3D3;
+}
+
+#assignee-dropdown {
+    overflow-y: auto;
+    padding: 0;
+}
+
+#assignee-dropdown.dropdown-menu {
+    display: none;
+    border-radius: 0.25rem;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    background-clip: padding-box;
+}
+
+#assignee-dropdown.show {
+    display:block;
+}
+
+#assignee-dropdown .dropdown-item{
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+#assignee-hidden input {
+    display: none;
+}
+
+.drop-zone {
+    border: 2px dashed #ced4da;
+    border-radius: 6px;
+    padding: 20px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.drop-zone.dragover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+}
+
+.preview-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.preview-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.preview-remove {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    text-align: center;
+    line-height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}

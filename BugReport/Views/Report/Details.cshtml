@@ -1,0 +1,417 @@
+﻿@using BugReport.Models.Report
+@using BugReport.Entities
+@model ReportViewModel
+
+@{
+    ViewData["Title"] = Model.Report.Title;
+}
+
+<style>
+    /* Activity Feed (Minimal Modern GitHub Style) */
+    .activity-feed {
+        margin-top: 0.5rem;
+    }
+
+    .activity-entry {
+        align-items: flex-start;
+    }
+
+    .activity-avatar {
+        width: 42px;
+        aspect-ratio: 1 / 1; /* Ensures perfect circle */
+        border-radius: 50%; /* Always round */
+        background: var(--bs-primary);
+        color: white;
+        display: flex; /* Centers text */
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex-shrink: 0; /* Prevents distortion when text wraps */
+    }
+
+    .activity-log {
+        padding: 6px 0;
+        line-height: 1.4;
+    }
+
+    .activity-message {
+        line-height: 1.5;
+        background: #f8f9fa !important;
+    }
+
+    .activity-content {
+        min-width: 0;
+    }
+</style>
+
+<div class="main-card py-4">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <div>
+                <h3 class="fw-bold mb-1">@Model.Report.Title</h3>
+                <span class="badge bg-primary">@Model.LatestChangeLog?.Status.Name</span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-dark btn-sm"
+                   asp-controller="Report" asp-action="Edit" asp-route-id="@Model.Report.Id">Edit</a>
+
+                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#activityModal">
+                    History
+                </button>
+
+                <button class="btn btn-outline-danger btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="card border mb-4">
+        <div class="card-header bg-light fw-semibold">Details</div>
+        <div class="card-body small text-muted">
+            <div><strong>Created by:</strong> @Model.Report.Reporter.FirstName @Model.Report.Reporter.LastName</div>
+            <div>
+                <strong>Assigned To:</strong>
+                @string.Join(", ", Model.Report.Assignees.Select(a => $"{a.FirstName} {a.LastName}"))
+            </div>
+            <div><strong>Created:</strong> @Model.Report.CreatedAt.ToString("g")</div>
+            <div><strong>Modified:</strong> @Model.LatestChangeLog?.Timestamp.ToString("g")</div>
+        </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="card border mb-4">
+        <div class="card-header bg-light fw-semibold">Description</div>
+        <div class="card-body text-muted">
+            @Html.Raw(Model.Report.Description.Replace("\n", "<br />"))
+        </div>
+    </div>
+
+    <!-- ATTACHMENTS -->
+    <div class="card border mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+            <span class="fw-semibold">Attachments</span>
+            <span class="badge bg-secondary">@Model.Report.Attachments?.Count()</span>
+        </div>
+
+        <div class="card-body">
+            @if (Model.Report.Attachments?.Any() ?? false)
+            {
+                <div class="row g-3">
+                    @foreach (var (attachment, index) in Model.Report.Attachments.Select((a, i) => (a, i)))
+                    {
+                        var relativePath = $"/uploads/reports/{Model.Report.Id}/{attachment.FileName}";
+
+                        <div class="col-6 col-md-3">
+                            <div class="card shadow-sm image-thumb position-relative overflow-hidden rounded"
+                                 data-index="@index"
+                                 data-src="@relativePath"
+                                 data-caption="Uploaded: @attachment.UploadedAt.ToString("g")"
+                                 style="cursor:pointer;">
+
+                                <img src="@relativePath"
+                                     class="card-img-top"
+                                     style="object-fit:cover;height:180px;transition:transform .3s;" />
+
+                                <div class="card-body p-2 small text-center text-muted bg-light">
+                                    Uploaded: @attachment.UploadedAt.ToString("g")
+                                </div>
+
+                                <div class="overlay position-absolute top-0 start-0 w-100 h-100
+                                                    d-flex justify-content-center align-items-center"
+                                     style="background:rgba(0,0,0,.3);opacity:0;transition:opacity .3s;">
+                                    <i class="bi bi-eye text-white fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No attachments added.</p>
+            }
+        </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="card border mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+            <span class="fw-semibold">Messages</span>
+            <span id="messagesBadge" class="badge bg-secondary">@Model.Report.Messages?.Count()</span>
+        </div>
+
+        <div class="card-body">
+            <div id="messageList">
+                @if (Model.Report.Messages?.Any() ?? false)
+                {
+                    @foreach (var message in Model.Report.Messages)
+                    {
+                        <div class="d-flex mb-3 message-item">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:40px;height:40px;font-weight:bold;">
+                                    @(message.User.FirstName[0])@(message.User.LastName[0])
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1 border rounded p-3 shadow-sm">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span class="fw-semibold">@message.User.FirstName @message.User.LastName</span>
+                                    <span>@message.TimeStamp.ToString("g")</span>
+                                </div>
+                                <p class="mb-0">@message.Text</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p id="noMessagesText" class="text-muted">No messages added.</p>
+                }
+            </div>
+
+            <form id="messageForm" asp-action="Message" method="post" class="mt-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ReportId" value="@Model.Report.Id" />
+
+                <textarea name="Text" class="form-control mb-2" placeholder="Add a message..."
+                          rows="2" style="resize:none;"></textarea>
+
+                <button type="submit" class="btn btn-dark-blue btn-sm">Post message</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to <strong>delete this bug report</strong>? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-controller="Report" asp-action="Delete" asp-route-id="@Model.Report.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- IMAGE GALLERY MODAL -->
+<div class="modal fade" id="imageGalleryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark text-white">
+            <button class="btn-close btn-close-white ms-auto m-2" data-bs-dismiss="modal"></button>
+            <div class="modal-body text-center position-relative">
+                <button id="galleryPrev" class="btn btn-light position-absolute top-50 start-0 translate-middle-y">❮</button>
+                <img id="galleryImage" class="img-fluid rounded" />
+                <div id="galleryCaption" class="mt-2 small"></div>
+                <button id="galleryNext" class="btn btn-light position-absolute top-50 end-0 translate-middle-y">❯</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIVITY MODAL -->
+<div class="modal fade" id="activityModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-light border-bottom">
+                <h5 class="modal-title fw-bold">Activity</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                @{
+                    var filteredLogs = Model.ChangeLogs
+                    .Where(cl => cl.ChangeDescription != "New message added");
+
+                    var fullActivity = filteredLogs
+                    .Select(l => new
+                    {
+                        Type = "log",
+                        Time = l.Timestamp,
+                        User = l.User,
+                        Status = l.Status?.Name,
+                        Text = l.ChangeDescription
+                    })
+                    .Concat(
+                    Model.Messages.Select(m => new
+                    {
+                        Type = "message",
+                        Time = m.TimeStamp,
+                        User = m.User,
+                        Status = (string)null,
+                        Text = m.Text
+                    })
+                    )
+                    .OrderBy(a => a.Time)
+                    .ToList();
+                }
+
+                @if (!fullActivity.Any())
+                {
+                    <p class="text-muted text-center">No activity yet.</p>
+                }
+                else
+                {
+                    <div class="activity-feed">
+                        @foreach (var item in fullActivity)
+                        {
+                            <div class="activity-entry d-flex mb-4">
+
+                                <!-- Avatar -->
+                                <div class="activity-avatar bg-primary text-white rounded-circle
+                                                     d-flex align-items-center justify-content-center me-3">
+                                    @(item.User.FirstName[0])@(item.User.LastName[0])
+                                </div>
+
+                                <!-- Content -->
+                                <div class="activity-content flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-semibold">@item.User.FirstName @item.User.LastName</span>
+                                        <span class="text-muted small">@item.Time.ToString("g")</span>
+                                    </div>
+
+                                    @if (item.Type == "log")
+                                    {
+                                        <div class="activity-log text-muted small">
+                                            @item.Text
+                                            @if (item.Status != null)
+                                            {
+                                                <span class="badge bg-info text-dark me-2">Status: @item.Status</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="activity-message border rounded px-3 py-2 bg-light">
+                                            <p class="mb-0">@item.Text</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            /* -------------------- MESSAGES -------------------- */
+            const form = document.getElementById("messageForm");
+            const list = document.getElementById("messageList");
+            const badge = document.getElementById("messagesBadge");
+            const emptyText = document.getElementById("noMessagesText");
+
+            function updateBadge() {
+                badge.textContent = list.querySelectorAll(".message-item").length;
+            }
+
+            if (form) {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    try {
+                        const data = new FormData(form);
+                        const res = await fetch(form.action, {
+                            method: "POST",
+                            body: data,
+                            headers: { "X-Requested-With": "XMLHttpRequest" }
+                        });
+
+                        if (!res.ok) return alert("Failed to post.");
+
+                        const json = await res.json();
+
+                        if (emptyText) emptyText.remove();
+
+                        const html = `
+                            <div class="d-flex mb-3 message-item">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:40px;height:40px;font-weight:bold;">
+                                        ${json.initials}
+                                    </div>
+                                </div>
+
+                                <div class="flex-grow-1 border rounded p-3 shadow-sm">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span class="fw-semibold">${json.user}</span>
+                                        <span>${json.timestamp}</span>
+                                    </div>
+                                    <p class="mb-0">${json.text}</p>
+                                </div>
+                            </div>
+                        `;
+
+                        list.insertAdjacentHTML("beforeend", html);
+                        form.querySelector("textarea").value = "";
+                        updateBadge();
+
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error posting message.");
+                    }
+                });
+            }
+
+            /* -------------------- IMAGE GALLERY -------------------- */
+            const items = [...document.querySelectorAll(".image-thumb")];
+            if (items.length > 0) {
+                const modal = new bootstrap.Modal(document.getElementById("imageGalleryModal"));
+                const img = document.getElementById("galleryImage");
+                const caption = document.getElementById("galleryCaption");
+                const prev = document.getElementById("galleryPrev");
+                const next = document.getElementById("galleryNext");
+
+                let index = 0;
+
+                function update() {
+                    const item = items[index];
+                    img.src = item.dataset.src;
+                    caption.textContent = item.dataset.caption || "";
+                }
+
+                items.forEach(item => item.addEventListener("click", () => {
+                    index = parseInt(item.dataset.index);
+                    update();
+                    modal.show();
+                }));
+
+                prev.onclick = () => {
+                    index = (index - 1 + items.length) % items.length;
+                    update();
+                };
+
+                next.onclick = () => {
+                    index = (index + 1) % items.length;
+                    update();
+                };
+            }
+        });
+    </script>
+}
