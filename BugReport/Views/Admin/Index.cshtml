@@ -5,8 +5,8 @@
 }
 
 <div class="main-card">
-    <form asp-controller="Admin" asp-action="Index" method="get">
-        <div class="row align-items-center g-3">
+    <form asp-controller="Admin" asp-action="Index" method="get" class="mb-3" id="adminFilterForm">
+        <div class="row align-items-center g-3">    
             <div class="col-12 col-md-6">
                 <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="Search users..." />
             </div>
@@ -30,14 +30,40 @@
                         <button type="submit" class="btn btn-dark-blue px-4 w-100">Filter</button>
                     </ul>
                 </div>
+
+                <!-- Filter reset button -->
+                <button type="button" id="resetFiltersBtn" class="btn btn-outline-secondary px-3" title="Reset filters">
+                    Reset
+                </button>
             </div>
         </div>
     </form>
 
-    <div class="table-responsive mt-4">
+    <!-- Anti-forgery token for AJAX -->
+    <form id="antiForgeryForm">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="d-flex gap-2 align-items-center mb-2">
+        <select id="bulkRoleSelect" class="form-select form-select-sm" style="width:200px;">
+            <option value="">Select role for selected</option>
+            @foreach (var role in ViewBag.Roles)
+            {
+                <option value="@role">@role</option>
+            }
+        </select>
+        <button id="applyBulkBtn" class="btn btn-dark-blue btn-sm">Apply to selected</button>
+        <button id="clearSelectionBtn" class="btn btn-outline-secondary btn-sm">Clear selection</button>
+        <div id="admin-alert-container" class="ms-auto"></div>
+    </div>
+
+    <div class="table-responsive mt-2">
         <table class="table align-middle report-table">
             <thead class="px-2 mt-4">
                 <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" />
+                    </th>
                     <th>User name</th>
                     <th>Name</th>
                     <th>Role</th>
@@ -48,17 +74,20 @@
                 {
                     @foreach (var user in Model)
                     {
-                        <tr>
+                        <tr data-userid="@user.User.Id">
+                            <td>
+                                <input type="checkbox" class="select-user" value="@user.User.Id" />
+                            </td>
                             <td>@user.User.UserName</td>
                             <td>@user.User.FirstName @user.User.LastName</td>
                             <td class="align-items-center">
-                                <form asp-controller="Admin" asp-action="ChangeUserRole" method="post" class="d-flex align-items-center gap-2">
+                                <form class="role-form d-flex align-items-center gap-2" data-userid="@user.User.Id" onsubmit="return false;">
                                     <input type="hidden" name="userId" value="@user.User.Id" />
 
                                     <select name="newRole" class="form-select form-select-sm p-2">
                                         @foreach (var role in ViewBag.Roles)
                                         {
-                                            @if (user.Roles.Contains(role))
+                                            if (user.Roles.Contains(role))
                                             {
                                                 <option value="@role" selected>@role</option>
                                             }
@@ -69,7 +98,7 @@
                                         }
                                     </select>
 
-                                    <button type="submit" class="btn btn-dark-blue px-2">Update</button>
+                                    <button type="button" class="btn btn-dark-blue px-2 btn-update-role">Update</button>
                                 </form>
                             </td>
                         </tr>
@@ -85,3 +114,164 @@
         </table>
     </div>
 </div>
+
+@section Scripts{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const alertContainer = document.getElementById("admin-alert-container");
+
+            function showAlert(type, message) {
+                const el = document.createElement("div");
+                el.className = `alert alert-${type} mt-2`;
+                el.textContent = message;
+                alertContainer.appendChild(el);
+                setTimeout(() => el.remove(), 4000);
+            }
+
+            // get antiforgery token
+            const tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : null;
+
+            // Single row update (AJAX)
+            document.querySelectorAll(".btn-update-role").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    const form = e.target.closest(".role-form");
+                    const userId = form.querySelector('input[name="userId"]').value;
+                    const newRole = form.querySelector('select[name="newRole"]').value;
+
+                    const fd = new FormData();
+                    fd.append("userId", userId);
+                    fd.append("newRole", newRole);
+
+                    try {
+                        const res = await fetch("/Admin/ChangeUserRoleAjax", {
+                            method: "POST",
+                            headers: token ? { "RequestVerificationToken": token } : {},
+                            body: fd
+                        });
+
+                        if (!res.ok) {
+                            showAlert("danger", "Server error");
+                            return;
+                        }
+
+                        const json = await res.json();
+                        if (json.success) {
+                            // update UI immediately (set select value and small highlight)
+                            form.querySelector('select[name="newRole"]').value = json.newRole;
+                            const row = document.querySelector(`tr[data-userid="${json.userId}"]`);
+                            if (row) {
+                                row.classList.add('table-success');
+                                setTimeout(() => row.classList.remove('table-success'), 1200);
+                            }
+                            showAlert("success", json.message);
+                        } else {
+                            showAlert("danger", json.message);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showAlert("danger", "Network error");
+                    }
+                });
+            });
+
+            // Filter reset button: clear search + role checkboxes and submit form
+            const resetBtn = document.getElementById("resetFiltersBtn");
+            resetBtn?.addEventListener("click", () => {
+                const filterForm = document.getElementById("adminFilterForm");
+                if (!filterForm) return;
+
+                // clear search input
+                const searchInput = filterForm.querySelector('input[name="search"]');
+                if (searchInput) searchInput.value = '';
+
+                // uncheck all role checkboxes
+                filterForm.querySelectorAll('input[name="roles"]').forEach(cb => cb.checked = false);
+
+                // submit the form (GET) to reload index without filters
+                filterForm.submit();
+            });
+
+            // Select all / clear
+            const selectAll = document.getElementById("selectAll");
+            selectAll?.addEventListener("change", (e) => {
+                document.querySelectorAll(".select-user").forEach(cb => cb.checked = e.target.checked);
+            });
+
+            document.getElementById("clearSelectionBtn")?.addEventListener("click", () => {
+                document.querySelectorAll(".select-user").forEach(cb => cb.checked = false);
+                if (selectAll) selectAll.checked = false;
+            });
+
+            // Bulk apply
+            document.getElementById("applyBulkBtn")?.addEventListener("click", async () => {
+                const selected = [...document.querySelectorAll(".select-user:checked")].map(cb => cb.value);
+                const newRole = document.getElementById("bulkRoleSelect").value;
+
+                if (!selected.length) {
+                    showAlert("warning", "No users selected.");
+                    return;
+                }
+                if (!newRole) {
+                    showAlert("warning", "Please choose a role.");
+                    return;
+                }
+
+                const fd = new FormData();
+                selected.forEach(id => fd.append("userIds", id));
+                fd.append("newRole", newRole);
+
+                try {
+                    const res = await fetch("/Admin/BulkChangeRolesAjax", {
+                        method: "POST",
+                        headers: token ? { "RequestVerificationToken": token } : {},
+                        body: fd
+                    });
+
+                    if (!res.ok) {
+                        showAlert("danger", "Server error");
+                        return;
+                    }
+
+                    const json = await res.json();
+                    if (json.success) {
+                        // update each affected row's select value instantly
+                        (json.updatedUserIds || []).forEach(id => {
+                            const row = document.querySelector(`tr[data-userid="${id}"]`);
+                            if (row) {
+                                const sel = row.querySelector('select[name="newRole"]');
+                                if (sel) sel.value = newRole;
+                                row.classList.add('table-success');
+                                setTimeout(() => row.classList.remove('table-success'), 1200);
+                            }
+                        });
+
+                        // clear selections
+                        document.querySelectorAll(".select-user:checked").forEach(cb => cb.checked = false);
+                        if (selectAll) selectAll.checked = false;
+
+                        showAlert("success", json.message);
+                    } else {
+                        showAlert("danger", json.message);
+                        if (json.errors) {
+                            json.errors.forEach(err => showAlert("warning", err));
+                        }
+                        // still update successful ones if any
+                        (json.updatedUserIds || []).forEach(id => {
+                            const row = document.querySelector(`tr[data-userid="${id}"]`);
+                            if (row) {
+                                const sel = row.querySelector('select[name="newRole"]');
+                                if (sel) sel.value = newRole;
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showAlert("danger", "Network error");
+                }
+            });
+        });
+    </script>
+
+    @await Html.PartialAsync("_ValidationScriptsPartial.cshtml")
+}
