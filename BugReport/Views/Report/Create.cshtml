@@ -22,7 +22,6 @@
                            placeholder="Add assignees..." autocomplete="off" />
                 </div>
 
-                <!-- Bootstrap-compatible dropdown -->
                 <div id="assignee-dropdown" class="dropdown-menu w-100 mt-1"></div>
 
                 <div id="assignee-hidden"></div>
@@ -37,8 +36,8 @@
         <div class="mb-3">
             <label asp-for="Attachments" class="form-label fw-bold"></label>
             <div id="file-dropzone" class="drop-zone border rounded bg-white p-4 text-center">
-                <p class="text-muted">Drag and drop images here or click to browse</p>
-                <input asp-for="Attachments" type="file" accept="image/*" id="file-input" class="d-none" multiple />
+                <p class="text-muted">Drag and drop files here or click to browse</p>
+                <input asp-for="Attachments" type="file" id="file-input" class="d-none" multiple />
             </div>
             <div id="file-preview" class="mt-3 d-flex flex-wrap gap-3"></div>
             <span asp-validation-for="Attachments" class="text-danger"></span>

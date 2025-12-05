@@ -127,14 +127,14 @@ namespace BugReport.Controllers
                 var uploadPath = Path.Combine("wwwroot", "uploads", "reports", report.Id.ToString());
                 Directory.CreateDirectory(uploadPath);
 
-                foreach (var image in model.Attachments)
+                foreach (var file in model.Attachments)
                 {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
                     var filePath = Path.Combine(uploadPath, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        await image.CopyToAsync(stream);
+                        await file.CopyToAsync(stream);
                     }
 
                     report.Attachments.Add(new Attachment
@@ -237,13 +237,11 @@ namespace BugReport.Controllers
 
             _context.Messages.Add(message);
 
-            // Get latest status
             var latestStatusId = report.ChangeLogs!
                 .OrderByDescending(cl => cl.Timestamp)
                 .Select(cl => cl.StatusId)
                 .FirstOrDefault();
 
-            // Create change log
             var changeLog = new ChangeLog
             {
                 Id = Guid.NewGuid(),

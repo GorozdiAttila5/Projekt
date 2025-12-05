@@ -238,6 +238,7 @@ class AttachmentManager {
         };
 
         this.dropzone.ondragleave = () => this.dropzone.classList.remove("dragover");
+
         this.dropzone.ondrop = e => {
             e.preventDefault();
             this.dropzone.classList.remove("dragover");
@@ -247,35 +248,66 @@ class AttachmentManager {
 
     addFiles(newFiles) {
         newFiles.forEach(file => {
-            if (!file.type.startsWith("image/")) return;
             if (this.files.some(f => f.name === file.name && f.size === file.size)) return;
 
             this.files.push(file);
             this.createPreview(file);
         });
+
         this.syncInput();
     }
 
-    createPreview(file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "preview-wrapper";
+    getFileIcon(file) {
+        const ext = file.name.split(".").pop().toLowerCase();
 
-            wrapper.innerHTML = `
-                <img src="${e.target.result}" />
-                <div class="preview-remove">&times;</div>
-            `;
-
-            wrapper.querySelector(".preview-remove").onclick = () => {
-                this.files = this.files.filter(f => f !== file);
-                wrapper.remove();
-                this.syncInput();
-            };
-
-            this.preview.appendChild(wrapper);
+        const icons = {
+            pdf: "📕",
+            doc: "📘",
+            docx: "📘",
+            xls: "📗",
+            xlsx: "📗",
+            csv: "📗",
+            ppt: "📙",
+            pptx: "📙",
+            txt: "📄",
+            zip: "🗂️",
+            rar: "🗂️",
+            "7z": "🗂️"
         };
-        reader.readAsDataURL(file);
+
+        return icons[ext] ?? "📁";
+    }
+
+    createPreview(file) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "file-card";
+
+        wrapper.innerHTML = `
+            <div class="file-thumb icon-thumb">${this.getFileIcon(file)}</div>
+            <div class="file-name">${file.name}</div>
+            <button class="file-remove">&times;</button>
+        `;
+
+        // Append early so DOM is ready
+        this.preview.appendChild(wrapper);
+
+        // IF IMAGE → load actual preview
+        if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const thumb = wrapper.querySelector(".file-thumb");
+                thumb.classList.add("image-thumb");
+                thumb.innerHTML = `<img src="${e.target.result}" />`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Delete handler
+        wrapper.querySelector(".file-remove").onclick = () => {
+            this.files = this.files.filter(f => f !== file);
+            wrapper.remove();
+            this.syncInput();
+        };
     }
 
     syncInput() {

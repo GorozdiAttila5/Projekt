@@ -6,128 +6,192 @@
     ViewData["Title"] = Model.Report.Title;
 }
 
+<!-- ===================== STYLES ===================== -->
 <style>
-    /* Activity Feed (Minimal Modern GitHub Style) */
-    .activity-feed {
-        margin-top: 0.5rem;
+    .section-card {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 0 8px rgba(0, 0, 0, .05);
     }
 
+    .section-header {
+        background: #f8f9fa;
+        padding: .75rem 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    /* ------------------ ATTACHMENTS ------------------ */
+    .attachment-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        padding: 10px;
+        text-align: center;
+        transition: box-shadow .2s;
+        height: 100%;
+    }
+
+        .attachment-card:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
+        }
+
+    .attachment-thumb {
+        height: 150px;
+        width: 100%;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .attachment-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .file-icon {
+        font-size: 42px;
+        opacity: .8;
+    }
+
+    .attachment-name {
+        font-size: .85rem;
+        margin-top: 6px;
+        color: #333;
+        word-break: break-word;
+    }
+
+    /* ------------------ MESSAGES ------------------ */
+    .msg-avatar {
+        width: 42px;
+        height: 42px;
+        background: var(--bs-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .msg-bubble {
+        background: #fafafa;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* ------------------ ACTIVITY FEED ------------------ */
     .activity-entry {
-        align-items: flex-start;
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
     }
 
     .activity-avatar {
         width: 42px;
-        aspect-ratio: 1 / 1; /* Ensures perfect circle */
-        border-radius: 50%; /* Always round */
+        height: 42px;
+        border-radius: 50%;
         background: var(--bs-primary);
         color: white;
-        display: flex; /* Centers text */
+        display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
-        font-size: 0.9rem;
-        flex-shrink: 0; /* Prevents distortion when text wraps */
     }
 
-    .activity-log {
-        padding: 6px 0;
-        line-height: 1.4;
-    }
-
-    .activity-message {
-        line-height: 1.5;
-        background: #f8f9fa !important;
-    }
-
-    .activity-content {
-        min-width: 0;
+    .activity-box {
+        background: #f8f9fa;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+        font-size: .9rem;
     }
 </style>
 
+
 <div class="main-card py-4">
 
-    <!-- HEADER -->
-    <div class="mb-4">
-        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-            <div>
-                <h3 class="fw-bold mb-1">@Model.Report.Title</h3>
-                <span class="badge bg-primary">@Model.LatestChangeLog?.Status.Name</span>
-            </div>
+    <!-- ===================== HEADER ===================== -->
+    <div class="d-flex justify-content-between align-items-start align-items-md-center mb-4 flex-column flex-md-row">
+        <div>
+            <h3 class="fw-bold mb-1">@Model.Report.Title</h3>
+            <span class="badge bg-primary">@Model.LatestChangeLog?.Status.Name</span>
+        </div>
 
-            <div class="d-flex gap-2">
-                <a class="btn btn-outline-dark btn-sm"
-                   asp-controller="Report" asp-action="Edit" asp-route-id="@Model.Report.Id">Edit</a>
-
-                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#activityModal">
-                    History
-                </button>
-
-                <button class="btn btn-outline-danger btn-sm"
-                        data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    Delete
-                </button>
-            </div>
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+            <a class="btn btn-outline-dark btn-sm" asp-action="Edit" asp-route-id="@Model.Report.Id">Edit</a>
+            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#activityModal">History</button>
+            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
         </div>
     </div>
 
-    <!-- DETAILS -->
-    <div class="card border mb-4">
-        <div class="card-header bg-light fw-semibold">Details</div>
-        <div class="card-body small text-muted">
+
+    <!-- ===================== DETAILS ===================== -->
+    <div class="section-card mb-4">
+        <div class="section-header">Details</div>
+        <div class="p-3 small text-muted">
             <div><strong>Created by:</strong> @Model.Report.Reporter.FirstName @Model.Report.Reporter.LastName</div>
-            <div>
-                <strong>Assigned To:</strong>
-                @string.Join(", ", Model.Report.Assignees.Select(a => $"{a.FirstName} {a.LastName}"))
-            </div>
+            <div><strong>Assigned to:</strong> @string.Join(", ", Model.Report.Assignees.Select(a => $"{a.FirstName} {a.LastName}"))</div>
             <div><strong>Created:</strong> @Model.Report.CreatedAt.ToString("g")</div>
-            <div><strong>Modified:</strong> @Model.LatestChangeLog?.Timestamp.ToString("g")</div>
+            <div><strong>Modified:</strong><span id="modifiedTimestamp">@Model.LatestChangeLog?.Timestamp.ToString("g")</span></div>
         </div>
     </div>
 
-    <!-- DESCRIPTION -->
-    <div class="card border mb-4">
-        <div class="card-header bg-light fw-semibold">Description</div>
-        <div class="card-body text-muted">
-            @Html.Raw(Model.Report.Description.Replace("\n", "<br />"))
+
+    <!-- ===================== DESCRIPTION ===================== -->
+    <div class="section-card mb-4">
+        <div class="section-header">Description</div>
+        <div class="p-3 text-muted">
+            @Html.Raw(Model.Report.Description.Replace("\n", "<br/>"))
         </div>
     </div>
 
-    <!-- ATTACHMENTS -->
-    <div class="card border mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-            <span class="fw-semibold">Attachments</span>
+
+    <!-- ===================== ATTACHMENTS ===================== -->
+    <div class="section-card mb-4">
+        <div class="section-header d-flex justify-content-between">
+            <span>Attachments</span>
             <span class="badge bg-secondary">@Model.Report.Attachments?.Count()</span>
         </div>
 
-        <div class="card-body">
+        <div class="p-3">
             @if (Model.Report.Attachments?.Any() ?? false)
             {
                 <div class="row g-3">
-                    @foreach (var (attachment, index) in Model.Report.Attachments.Select((a, i) => (a, i)))
+                    @foreach (var att in Model.Report.Attachments)
                     {
-                        var relativePath = $"/uploads/reports/{Model.Report.Id}/{attachment.FileName}";
+                        var rel = $"/uploads/reports/{Model.Report.Id}/{att.FileName}";
+                        var ext = System.IO.Path.GetExtension(att.FileName).ToLower();
+                        var isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext);
 
                         <div class="col-6 col-md-3">
-                            <div class="card shadow-sm image-thumb position-relative overflow-hidden rounded"
-                                 data-index="@index"
-                                 data-src="@relativePath"
-                                 data-caption="Uploaded: @attachment.UploadedAt.ToString("g")"
-                                 style="cursor:pointer;">
+                            <div class="attachment-card">
 
-                                <img src="@relativePath"
-                                     class="card-img-top"
-                                     style="object-fit:cover;height:180px;transition:transform .3s;" />
-
-                                <div class="card-body p-2 small text-center text-muted bg-light">
-                                    Uploaded: @attachment.UploadedAt.ToString("g")
+                                <div class="attachment-thumb">
+                                    @if (isImg)
+                                    {
+                                        <img src="@rel"
+                                             data-src="@rel"
+                                             data-caption="@att.UploadedAt.ToString("g")"
+                                             class="attachment-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="file-icon">@GetFileIcon(ext)</div>
+                                    }
                                 </div>
 
-                                <div class="overlay position-absolute top-0 start-0 w-100 h-100
-                                                    d-flex justify-content-center align-items-center"
-                                     style="background:rgba(0,0,0,.3);opacity:0;transition:opacity .3s;">
-                                    <i class="bi bi-eye text-white fs-3"></i>
-                                </div>
+                                <div class="attachment-name">@att.FileName</div>
+
+                                <a href="@rel" download class="btn btn-outline-primary btn-sm w-100 mt-2">
+                                    Download
+                                </a>
                             </div>
                         </div>
                     }
@@ -140,33 +204,31 @@
         </div>
     </div>
 
-    <!-- MESSAGES -->
-    <div class="card border mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-            <span class="fw-semibold">Messages</span>
+
+    <!-- ===================== MESSAGES ===================== -->
+    <div class="section-card mb-4">
+        <div class="section-header d-flex justify-content-between">
+            <span>Messages</span>
             <span id="messagesBadge" class="badge bg-secondary">@Model.Report.Messages?.Count()</span>
         </div>
 
-        <div class="card-body">
+        <div class="p-3">
             <div id="messageList">
                 @if (Model.Report.Messages?.Any() ?? false)
                 {
-                    @foreach (var message in Model.Report.Messages)
+                    @foreach (var msg in Model.Report.Messages)
                     {
                         <div class="d-flex mb-3 message-item">
-                            <div class="flex-shrink-0 me-3">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width:40px;height:40px;font-weight:bold;">
-                                    @(message.User.FirstName[0])@(message.User.LastName[0])
-                                </div>
+                            <div class="msg-avatar me-3">
+                                @(msg.User.FirstName[0])@(msg.User.LastName[0])
                             </div>
 
-                            <div class="flex-grow-1 border rounded p-3 shadow-sm">
+                            <div class="msg-bubble p-3 flex-grow-1">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
-                                    <span class="fw-semibold">@message.User.FirstName @message.User.LastName</span>
-                                    <span>@message.TimeStamp.ToString("g")</span>
+                                    <strong>@msg.User.FirstName @msg.User.LastName</strong>
+                                    <span>@msg.TimeStamp.ToString("g")</span>
                                 </div>
-                                <p class="mb-0">@message.Text</p>
+                                <div>@msg.Text</div>
                             </div>
                         </div>
                     }
@@ -177,35 +239,32 @@
                 }
             </div>
 
+            <!-- POST MESSAGE -->
             <form id="messageForm" asp-action="Message" method="post" class="mt-3">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="ReportId" value="@Model.Report.Id" />
 
-                <textarea name="Text" class="form-control mb-2" placeholder="Add a message..."
-                          rows="2" style="resize:none;"></textarea>
+                <textarea name="Text" class="form-control mb-2" rows="2" placeholder="Add a message..." style="resize:none;"></textarea>
 
-                <button type="submit" class="btn btn-dark-blue btn-sm">Post message</button>
+                <button class="btn btn-dark-blue btn-sm">Post message</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- DELETE MODAL -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
+
+<!-- ===================== DELETE MODAL ===================== -->
+<div class="modal fade" id="deleteModal">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to <strong>delete this bug report</strong>? This action cannot be undone.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form asp-controller="Report" asp-action="Delete" asp-route-id="@Model.Report.Id" method="post" class="d-inline">
+        <div class="modal-content p-3">
+            <h5 class="fw-bold mb-3">Confirm Delete</h5>
+            <p>This action cannot be undone.</p>
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                <form asp-action="Delete" asp-route-id="@Model.Report.Id" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>
@@ -213,204 +272,218 @@
 </div>
 
 
-<!-- IMAGE GALLERY MODAL -->
-<div class="modal fade" id="imageGalleryModal" tabindex="-1">
+<!-- ===================== IMAGE MODAL ===================== -->
+<div class="modal fade" id="imageGalleryModal">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-dark text-white">
+
             <button class="btn-close btn-close-white ms-auto m-2" data-bs-dismiss="modal"></button>
+
             <div class="modal-body text-center position-relative">
-                <button id="galleryPrev" class="btn btn-light position-absolute top-50 start-0 translate-middle-y">❮</button>
+
+                <button id="galleryPrev"
+                        class="btn btn-light position-absolute top-50 start-0 translate-middle-y">
+                    ❮
+                </button>
+
                 <img id="galleryImage" class="img-fluid rounded" />
+
                 <div id="galleryCaption" class="mt-2 small"></div>
-                <button id="galleryNext" class="btn btn-light position-absolute top-50 end-0 translate-middle-y">❯</button>
+
+                <button id="galleryNext"
+                        class="btn btn-light position-absolute top-50 end-0 translate-middle-y">
+                    ❯
+                </button>
+
             </div>
         </div>
     </div>
 </div>
 
-<!-- ACTIVITY MODAL -->
-<div class="modal fade" id="activityModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+
+<!-- ===================== ACTIVITY MODAL ===================== -->
+<div class="modal fade" id="activityModal">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
 
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold">Activity</h5>
+            <div class="modal-header bg-light">
+                <h5 class="fw-bold">Activity</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
 
                 @{
-                    var filteredLogs = Model.ChangeLogs
-                    .Where(cl => cl.ChangeDescription != "New message added");
-
-                    var fullActivity = filteredLogs
-                    .Select(l => new
+                    var timeline = Model.ChangeLogs.Select(log => new
                     {
-                        Type = "log",
-                        Time = l.Timestamp,
-                        User = l.User,
-                        Status = l.Status?.Name,
-                        Text = l.ChangeDescription
+                        Time = log.Timestamp,
+                        User = log.User,
+                        Text = log.ChangeDescription,
+                        Type = "log"
                     })
-                    .Concat(
-                    Model.Messages.Select(m => new
-                    {
-                        Type = "message",
-                        Time = m.TimeStamp,
-                        User = m.User,
-                        Status = (string)null,
-                        Text = m.Text
-                    })
-                    )
-                    .OrderBy(a => a.Time)
+                    .OrderBy(t => t.Time)
                     .ToList();
                 }
 
-                @if (!fullActivity.Any())
+                @if (!timeline.Any())
                 {
                     <p class="text-muted text-center">No activity yet.</p>
                 }
                 else
                 {
-                    <div class="activity-feed">
-                        @foreach (var item in fullActivity)
+                    <div id="activityFeed">
+                        @foreach (var t in timeline)
                         {
-                            <div class="activity-entry d-flex mb-4">
-
-                                <!-- Avatar -->
-                                <div class="activity-avatar bg-primary text-white rounded-circle
-                                                     d-flex align-items-center justify-content-center me-3">
-                                    @(item.User.FirstName[0])@(item.User.LastName[0])
+                            <div class="activity-entry">
+                                <div class="activity-avatar">
+                                    @(t.User.FirstName[0])@(t.User.LastName[0])
                                 </div>
 
-                                <!-- Content -->
-                                <div class="activity-content flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-semibold">@item.User.FirstName @item.User.LastName</span>
-                                        <span class="text-muted small">@item.Time.ToString("g")</span>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <strong>@t.User.FirstName @t.User.LastName</strong>
+                                        <span class="text-muted">@t.Time.ToString("g")</span>
                                     </div>
 
-                                    @if (item.Type == "log")
-                                    {
-                                        <div class="activity-log text-muted small">
-                                            @item.Text
-                                            @if (item.Status != null)
-                                            {
-                                                <span class="badge bg-info text-dark me-2">Status: @item.Status</span>
-                                            }
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="activity-message border rounded px-3 py-2 bg-light">
-                                            <p class="mb-0">@item.Text</p>
-                                        </div>
-                                    }
+                                    <div class="activity-box">
+                                        @t.Text
+                                    </div>
                                 </div>
                             </div>
                         }
-                    </div>
+                    </div>   
                 }
             </div>
         </div>
     </div>
 </div>
 
+
+<!-- ===================== FILE ICON HELPER ===================== -->
+@functions {
+    public string GetFileIcon(string ext) => ext switch
+    {
+        ".pdf" => "📕",
+        ".doc" => "📘",
+        ".docx" => "📘",
+        ".xls" => "📗",
+        ".xlsx" => "📗",
+        ".csv" => "📗",
+        ".ppt" => "📙",
+        ".pptx" => "📙",
+        ".zip" => "🗂️",
+        ".rar" => "🗂️",
+        ".7z" => "🗂️",
+        ".txt" => "📄",
+        _ => "📁"
+    };
+}
+
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", () => {
 
-            /* -------------------- MESSAGES -------------------- */
-            const form = document.getElementById("messageForm");
-            const list = document.getElementById("messageList");
-            const badge = document.getElementById("messagesBadge");
-            const emptyText = document.getElementById("noMessagesText");
+            /* ---------------- IMAGE GALLERY ---------------- */
+            const imgs = [...document.querySelectorAll(".attachment-image")];
 
-            function updateBadge() {
-                badge.textContent = list.querySelectorAll(".message-item").length;
-            }
-
-            if (form) {
-                form.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-
-                    try {
-                        const data = new FormData(form);
-                        const res = await fetch(form.action, {
-                            method: "POST",
-                            body: data,
-                            headers: { "X-Requested-With": "XMLHttpRequest" }
-                        });
-
-                        if (!res.ok) return alert("Failed to post.");
-
-                        const json = await res.json();
-
-                        if (emptyText) emptyText.remove();
-
-                        const html = `
-                            <div class="d-flex mb-3 message-item">
-                                <div class="flex-shrink-0 me-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                         style="width:40px;height:40px;font-weight:bold;">
-                                        ${json.initials}
-                                    </div>
-                                </div>
-
-                                <div class="flex-grow-1 border rounded p-3 shadow-sm">
-                                    <div class="d-flex justify-content-between small text-muted mb-1">
-                                        <span class="fw-semibold">${json.user}</span>
-                                        <span>${json.timestamp}</span>
-                                    </div>
-                                    <p class="mb-0">${json.text}</p>
-                                </div>
-                            </div>
-                        `;
-
-                        list.insertAdjacentHTML("beforeend", html);
-                        form.querySelector("textarea").value = "";
-                        updateBadge();
-
-                    } catch (err) {
-                        console.error(err);
-                        alert("Error posting message.");
-                    }
-                });
-            }
-
-            /* -------------------- IMAGE GALLERY -------------------- */
-            const items = [...document.querySelectorAll(".image-thumb")];
-            if (items.length > 0) {
-                const modal = new bootstrap.Modal(document.getElementById("imageGalleryModal"));
+            if (imgs.length) {
+                const modal = new bootstrap.Modal("#imageGalleryModal");
                 const img = document.getElementById("galleryImage");
-                const caption = document.getElementById("galleryCaption");
+                const cap = document.getElementById("galleryCaption");
                 const prev = document.getElementById("galleryPrev");
                 const next = document.getElementById("galleryNext");
 
                 let index = 0;
 
-                function update() {
-                    const item = items[index];
-                    img.src = item.dataset.src;
-                    caption.textContent = item.dataset.caption || "";
-                }
-
-                items.forEach(item => item.addEventListener("click", () => {
-                    index = parseInt(item.dataset.index);
-                    update();
-                    modal.show();
-                }));
-
-                prev.onclick = () => {
-                    index = (index - 1 + items.length) % items.length;
-                    update();
+                const show = () => {
+                    img.src = imgs[index].dataset.src;
+                    cap.textContent = imgs[index].dataset.caption;
                 };
 
-                next.onclick = () => {
-                    index = (index + 1) % items.length;
-                    update();
-                };
+                imgs.forEach((el, i) =>
+                    el.addEventListener("click", () => {
+                        index = i; show(); modal.show();
+                    })
+                );
+
+                prev.onclick = () => { index = (index - 1 + imgs.length) % imgs.length; show(); };
+                next.onclick = () => { index = (index + 1) % imgs.length; show(); };
+            }
+
+            /* ---------------- POST MESSAGE ---------------- */
+            const form = document.getElementById("messageForm");
+            const list = document.getElementById("messageList");
+            const badge = document.getElementById("messagesBadge");
+
+            if (form) {
+                form.addEventListener("submit", async e => {
+                    e.preventDefault();
+
+                    const data = new FormData(form);
+
+                    const res = await fetch(form.action, {
+                        method: "POST",
+                        body: data,
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+
+                    if (!res.ok) {
+                        alert("Failed to post message.");
+                        return;
+                    }
+
+                    const json = await res.json();
+
+                    /* ------------------ 1. ADD MESSAGE TO MESSAGE LIST ------------------ */
+                    list.insertAdjacentHTML("beforeend", `
+                        <div class="d-flex mb-3 message-item">
+                            <div class="msg-avatar me-3">${json.initials}</div>
+                            <div class="msg-bubble p-3 flex-grow-1">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <strong>${json.user}</strong>
+                                    <span>${json.timestamp}</span>
+                                </div>
+                                <div>${json.text}</div>
+                            </div>
+                        </div>
+                    `);
+
+                    /* ------------------ 2. UPDATE MODIFIED TIMESTAMP ------------------ */
+                    const modified = document.getElementById("modifiedTimestamp");
+                    if (modified) {
+                        modified.textContent = json.timestamp;
+                    }
+
+                    /* ------------------ 3. INSERT INTO ACTIVITY FEED ------------------ */
+                    const activity = document.getElementById("activityFeed");
+
+                    if (activity) {
+                        activity.insertAdjacentHTML("beforeend", `
+                            <div class="activity-entry">
+                                <div class="activity-avatar">
+                                    ${json.initials}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <strong>${json.user}</strong>
+                                        <span class="text-muted">${json.timestamp}</span>
+                                    </div>
+                                    <div class="activity-box">
+                                        ${json.text}
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    }
+
+                    /* ------------------ 4. CLEANUP ------------------ */
+                    form.reset();
+                    badge.textContent = document.querySelectorAll(".message-item").length;
+
+                    const emptyText = document.getElementById("noMessagesText");
+                    if (emptyText) emptyText.remove();
+                });
             }
         });
     </script>
