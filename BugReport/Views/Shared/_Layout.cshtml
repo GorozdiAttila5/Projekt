@@ -1,8 +1,4 @@
-﻿@using BugReport.Entities
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<User> signInManager;
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -15,10 +11,7 @@
     </head>
     <body>
 
-        @if (signInManager.IsSignedIn(User))
-        {
-            <partial name="_NavbarPartial" />
-        }
+        <partial name="_NavbarPartial" />
 
         <main role="main">
             <div class="main-container">

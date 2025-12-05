@@ -29,7 +29,7 @@
                     </div>
                     <div id="assignee-dropdown" class="dropdown-menu w-100 mt-1"></div>
                     <div id="assignee-hidden">
-                        @foreach (var a in Model.Assignees)
+                        @foreach (var a in Model.Assignees ?? new List<string>())
                         {
                             <input type="hidden" name="Assignees[]" value="@a" data-id="@a" />
                         }

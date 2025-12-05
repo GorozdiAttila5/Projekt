@@ -1,4 +1,7 @@
-﻿<header>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer localizer
+
+<header>
     <nav class="navbar navbar-expand-lg bg-white border-bottom px-3 shadow-sm">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button"
@@ -17,7 +20,7 @@
                     <li>
                         <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-link text-danger p-0">Logout</button>
+                            <button type="submit" class="btn btn-link text-danger p-0">@localizer["logout"]</button>
                         </form>
                     </li>
                 </ul>
@@ -28,20 +31,32 @@
 
 <div id="sidebar" class="sidebar collapse">
     <div class="sidebar-header d-flex justify-content-between align-items-center p-3">
-        <h5 class="mb-0">Menu</h5>
+        <h5 class="mb-0">@localizer["menu"]</h5>
         <button class="btn btn-close" data-bs-toggle="collapse" data-bs-target="#sidebar"></button>
     </div>
 
     @if (User.IsInRole("Admin"))
     {
         <div class="p-3 align-content-center">
-            <a class="nav-link text-dark d-block mb-2" asp-controller="Admin" asp-action="Index">Dashboard</a>
+            <a class="nav-link text-dark d-block mb-2" asp-controller="Admin" asp-action="Index">@localizer["dashboard"]</a>
         </div>
     }
 
     <div class="p-3 align-content-center">
-        <a class="nav-link text-dark d-block mb-2" asp-controller="Report" asp-action="Index">Reports</a>
+        <a class="nav-link text-dark d-block mb-2" asp-controller="Report" asp-action="Index">@localizer["report"]</a>
     </div>
+
+    <ul class="navbar-nav p-3">
+        <li class="nav-item">
+            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                @System.Globalization.CultureInfo.CurrentCulture.DisplayName
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" asp-controller="Language" asp-action="Index" asp-route-culture="en">En</a></li>
+                <li><a class="dropdown-item" asp-controller="Language" asp-action="Index" asp-route-culture="hu">Hu</a></li>
+            </ul>
+        </li>
+    </ul>
 </div>
 
 <div id="sidebar-overlay" class="sidebar-overlay" data-bs-toggle="collapse" data-bs-target="#sidebar"></div>

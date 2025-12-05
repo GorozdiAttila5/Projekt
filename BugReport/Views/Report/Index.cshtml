@@ -63,12 +63,15 @@
                             </td>
                             <td class="text-truncate title-cell justify-content-between" style="max-width:250px" title="@item.Report.Title">
                                 @item.Report.Title
-                                <span class="badge bg-primary float-end">
-                                    @(item.LatestChangeLog?.Status != null ? $"{item.LatestChangeLog.Status.Name}" : "Null")
-                                </span>
+                                @if (item.LatestChangeLog!.Status.Name != null)
+                                {
+                                    <span class="badge @GetStatusBadgeClass(item.LatestChangeLog.Status.Name) float-end">
+                                        @item.LatestChangeLog.Status.Name
+                                    </span>
+                                }
                             </td>
                             <td class="text-end text-muted" style="min-width:150px">
-                                @item.LatestChangeLog.Timestamp.ToString("d")
+                                @item.LatestChangeLog?.Timestamp.ToString("d")
                             </td>
                         </tr>
                     }
@@ -83,6 +86,16 @@
         </table>
     </div>
 </div>
+
+@functions {
+    public string GetStatusBadgeClass(string normalizedStatus) => normalizedStatus?.ToUpper() switch
+    {
+        "RESOLVED" => "bg-success",
+        "REJECTED" => "bg-danger",
+        "BLOCKED" => "bg-warning",
+        _ => "bg-dark"
+    };
+}
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

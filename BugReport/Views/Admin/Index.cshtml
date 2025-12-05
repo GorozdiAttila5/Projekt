@@ -80,27 +80,7 @@
                             </td>
                             <td>@user.User.UserName</td>
                             <td>@user.User.FirstName @user.User.LastName</td>
-                            <td class="align-items-center">
-                                <form class="role-form d-flex align-items-center gap-2" data-userid="@user.User.Id" onsubmit="return false;">
-                                    <input type="hidden" name="userId" value="@user.User.Id" />
-
-                                    <select name="newRole" class="form-select form-select-sm p-2">
-                                        @foreach (var role in ViewBag.Roles)
-                                        {
-                                            if (user.Roles.Contains(role))
-                                            {
-                                                <option value="@role" selected>@role</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@role">@role</option>
-                                            }
-                                        }
-                                    </select>
-
-                                    <button type="button" class="btn btn-dark-blue px-2 btn-update-role">Update</button>
-                                </form>
-                            </td>
+                            <td>@string.Join(", ", user.Roles)</td>
                         </tr>
                     }
                 }
@@ -131,49 +111,6 @@
             // get antiforgery token
             const tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
             const token = tokenInput ? tokenInput.value : null;
-
-            // Single row update (AJAX)
-            document.querySelectorAll(".btn-update-role").forEach(btn => {
-                btn.addEventListener("click", async (e) => {
-                    const form = e.target.closest(".role-form");
-                    const userId = form.querySelector('input[name="userId"]').value;
-                    const newRole = form.querySelector('select[name="newRole"]').value;
-
-                    const fd = new FormData();
-                    fd.append("userId", userId);
-                    fd.append("newRole", newRole);
-
-                    try {
-                        const res = await fetch("/Admin/ChangeUserRoleAjax", {
-                            method: "POST",
-                            headers: token ? { "RequestVerificationToken": token } : {},
-                            body: fd
-                        });
-
-                        if (!res.ok) {
-                            showAlert("danger", "Server error");
-                            return;
-                        }
-
-                        const json = await res.json();
-                        if (json.success) {
-                            // update UI immediately (set select value and small highlight)
-                            form.querySelector('select[name="newRole"]').value = json.newRole;
-                            const row = document.querySelector(`tr[data-userid="${json.userId}"]`);
-                            if (row) {
-                                row.classList.add('table-success');
-                                setTimeout(() => row.classList.remove('table-success'), 1200);
-                            }
-                            showAlert("success", json.message);
-                        } else {
-                            showAlert("danger", json.message);
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        showAlert("danger", "Network error");
-                    }
-                });
-            });
 
             // Filter reset button: clear search + role checkboxes and submit form
             const resetBtn = document.getElementById("resetFiltersBtn");
@@ -209,11 +146,14 @@
                 const newRole = document.getElementById("bulkRoleSelect").value;
 
                 if (!selected.length) {
-                    showAlert("warning", "No users selected.");
+                    // Instead of in-page alerts → TempData toast via reload
+                    await fetch("/Admin/TempDataWarn?n=Please select at least one user.");
+                    location.reload();
                     return;
                 }
                 if (!newRole) {
-                    showAlert("warning", "Please choose a role.");
+                    await fetch("/Admin/TempDataWarn?n=Please choose a role.");
+                    location.reload();
                     return;
                 }
 
@@ -228,46 +168,16 @@
                         body: fd
                     });
 
-                    if (!res.ok) {
-                        showAlert("danger", "Server error");
+                    const json = await res.json();
+                    if (json.reload) {
+                        location.reload();
                         return;
                     }
-
-                    const json = await res.json();
-                    if (json.success) {
-                        // update each affected row's select value instantly
-                        (json.updatedUserIds || []).forEach(id => {
-                            const row = document.querySelector(`tr[data-userid="${id}"]`);
-                            if (row) {
-                                const sel = row.querySelector('select[name="newRole"]');
-                                if (sel) sel.value = newRole;
-                                row.classList.add('table-success');
-                                setTimeout(() => row.classList.remove('table-success'), 1200);
-                            }
-                        });
-
-                        // clear selections
-                        document.querySelectorAll(".select-user:checked").forEach(cb => cb.checked = false);
-                        if (selectAll) selectAll.checked = false;
-
-                        showAlert("success", json.message);
-                    } else {
-                        showAlert("danger", json.message);
-                        if (json.errors) {
-                            json.errors.forEach(err => showAlert("warning", err));
-                        }
-                        // still update successful ones if any
-                        (json.updatedUserIds || []).forEach(id => {
-                            const row = document.querySelector(`tr[data-userid="${id}"]`);
-                            if (row) {
-                                const sel = row.querySelector('select[name="newRole"]');
-                                if (sel) sel.value = newRole;
-                            }
-                        });
-                    }
-                } catch (err) {
+                }
+                catch (err) {
                     console.error(err);
-                    showAlert("danger", "Network error");
+                    await fetch("/Admin/TempDataError?n=Network error.");
+                    location.reload();
                 }
             });
         });

@@ -1,65 +1,57 @@
 ﻿@using BugReport.Models.Account
+@using Microsoft.AspNetCore.Mvc.Localization
 @model RegisterViewModel;
+@inject IViewLocalizer localizer
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = localizer["register"];
+    Layout = "_AccountLayout";
 }
-
-<div class="account-container">
-    <div class="account-card">
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4 text-center text-sm-start">
-            <div class="title-text mb-3 mb-sm-0">STUDENT <br /> ERROR REPORTING</div>
-            <img src="~/img/logo.svg" alt="Illustration" class="img-fluid" style="max-height:120px;" />
-        </div>
-
-        <hr />
-
-        <h4 class="mb-4 fw-bold">REGISTER</h4>
-        <form asp-action="Register" method="post">
-            @Html.AntiForgeryToken()
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="UserName" class="form-label"></label>
-                <input asp-for="UserName" class="form-control"
-                       maxlength="6" oninput="this.value = this.value.toUpperCase()" />
-                <span asp-validation-for="UserName" class="text-danger"></span>
-            </div>
-            <div class="row">
-                <div class="col mb-3 col-md-6 col-12">
-                    <label asp-for="FirstName" class="form-label"></label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger"></span>
-                </div>
-                <div class="col mb-3 col-md-6 col-12">
-                    <label asp-for="LastName" class="form-label"></label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="submit" value="Register" class="btn btn-dark-blue w-100 p-2" />
-            <div>
-                <p class="text-center mt-2">
-                    Already have an account?
-                    <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Login</a>
-                </p>
-            </div>
-        </form>
+    
+<h4 class="mb-4 fw-bold" style="text-transform: uppercase">@localizer["register"]</h4>
+<form asp-action="Register" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-</div>
+    <div class="mb-3">
+        <label asp-for="UserName" class="form-label"></label>
+        <input asp-for="UserName" class="form-control"
+               maxlength="6" oninput="this.value = this.value.toUpperCase()" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    <div class="row">
+        <div class="col mb-3 col-md-6 col-12">
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="col mb-3 col-md-6 col-12">
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ConfirmPassword" class="form-label"></label>
+        <input asp-for="ConfirmPassword" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="submit" value="@localizer["register"]" class="btn btn-dark-blue w-100 p-2" />
+    <div>
+        <p class="text-center mt-2">
+            @localizer["already-have-an-account"]
+            <a asp-controller="Account" asp-action="Login" class="text-decoration-none">@localizer["login"]</a>
+        </p>
+    </div>
+</form>
 
 @section Scripts {
     @{

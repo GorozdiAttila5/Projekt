@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.Extensions.Localization;
+using System.ComponentModel.DataAnnotations;
 
 namespace BugReport.Models.Account
 {

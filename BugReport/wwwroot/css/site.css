@@ -21,12 +21,20 @@ body {
     padding: 20px;
 }
 
+.account-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
 .account-card {
     background: #ffffff;
     padding: 40px;
     border-radius: 20px;
     width: 650px;
     box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    margin: 20px;
 }
 
 .main-card {
@@ -310,4 +318,8 @@ img {
 
 .file-remove:hover {
     background: #bb2d3b;
+}
+
+input[type="checkbox"]{
+    accent-color: var(--main-color)
 }

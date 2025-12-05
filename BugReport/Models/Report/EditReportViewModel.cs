@@ -11,15 +11,15 @@ namespace BugReport.Models.Report
         [Required(ErrorMessage = "{0} is required")]
         [MaxLength(125, ErrorMessage = "The {0} cannot exceed {1} charaters")]
         [Display(Name = "Title", Prompt = "Title")]
-        public required string Title { get; set; } = string.Empty;
+        public required string Title { get; set; }
 
 
-        [Required(ErrorMessage = "Please give atleat one assignee")]
-        public required List<string> Assignees { get; set; } = new();
+        [MinLength(1, ErrorMessage = "Please give at least one assignee")]
+        public List<string> Assignees { get; set; } = new();
 
         [Required(ErrorMessage = "{0} is required")]
         [Display(Name = "Desctiption", Prompt = "Description")]
-        public required string Description { get; set; } = string.Empty;
+        public required string Description { get; set; }
 
         public List<AttachmentViewModel> Attachments { get; set; } = new();
         public List<Guid> ExistingAttachments { get; set; } = new();

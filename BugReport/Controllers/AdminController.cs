@@ -66,70 +66,14 @@ namespace BugReport.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChangeUserRole(string userId, string newRole)
-        {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(newRole))
-                return RedirectToAction("Index");
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return RedirectToAction("Index");
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-
-            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            if (!removeResult.Succeeded)
-            {
-                TempData["ErrorToast"] = "Could not remove old roles.";
-                return RedirectToAction("Index");
-            }
-
-            var addResult = await _userManager.AddToRoleAsync(user, newRole);
-            if (!addResult.Succeeded)
-            {
-                TempData["ErrorToast"] = "Could not add new role.";
-            }
-            else
-            {
-                TempData["SuccessToast"] = $"Role updated to {newRole} for {user.UserName}.";
-            }
-
-            return RedirectToAction("Index");
-        }
-
-        // AJAX endpoint for single role change
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangeUserRoleAjax(string userId, string newRole)
-        {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(newRole))
-                return Json(new { success = false, message = "Invalid input." });
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return Json(new { success = false, message = "User not found." });
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-
-            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            if (!removeResult.Succeeded)
-                return Json(new { success = false, message = "Could not remove old roles." });
-
-            var addResult = await _userManager.AddToRoleAsync(user, newRole);
-            if (!addResult.Succeeded)
-                return Json(new { success = false, message = "Could not add new role." });
-
-            // return the userId and newRole so client can update UI immediately
-            return Json(new { success = true, message = $"Role updated to {newRole} for {user.UserName}.", userId = userId, newRole = newRole });
-        }
-
-        // AJAX endpoint for bulk role changes (userIds[] + newRole)
-        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BulkChangeRolesAjax(string[] userIds, string newRole)
         {
             if (userIds == null || userIds.Length == 0 || string.IsNullOrEmpty(newRole))
-                return Json(new { success = false, message = "Invalid input." });
+            {
+                TempData["ErrorToast"] = "Invalid input.";
+                return Json(new { success = false, reload = true });
+            }
 
             var results = new List<string>();
             var succeeded = new List<string>();
@@ -145,6 +89,7 @@ namespace BugReport.Controllers
                 }
 
                 var currentRoles = await _userManager.GetRolesAsync(user);
+
                 var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 if (!removeResult.Succeeded)
                 {
@@ -165,10 +110,31 @@ namespace BugReport.Controllers
 
             if (results.Any())
             {
-                return Json(new { success = results.Count == 0, message = $"Completed with errors. Success: {successCount}", errors = results, updatedUserIds = succeeded });
+                TempData["WarnToast"] =
+                    $"Completed with errors.\nSuccess: {successCount}\n" +
+                    string.Join("\n", results);
+
+                return Json(new { success = false, reload = true });
             }
 
-            return Json(new { success = true, message = $"Role '{newRole}' assigned to {successCount} user(s).", updatedUserIds = succeeded });
+            TempData["SuccessToast"] = $"Role '{newRole}' assigned to {successCount} user(s).";
+
+            return Json(new { success = true, reload = true });
         }
+
+        [HttpGet]
+        public IActionResult TempDataWarn(string n)
+        {
+            TempData["WarnToast"] = n;
+            return Ok();
+        }
+
+        [HttpGet]
+        public IActionResult TempDataError(string n)
+        {
+            TempData["ErrorToast"] = n;
+            return Ok();
+        }
+
     }
 }

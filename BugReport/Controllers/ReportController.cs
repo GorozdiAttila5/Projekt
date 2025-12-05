@@ -283,6 +283,7 @@ namespace BugReport.Controllers
             });
         }
 
+        [Authorize(Roles = "Student,Instructor")]
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -325,20 +326,14 @@ namespace BugReport.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Student,Instructor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditReportViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Statuses = await _context.Statuses.ToListAsync();
-                ViewBag.IsReporter = true;
-                return View(model);
-            }
-
             var userId = _userManager.GetUserId(User);
 
-            // Load only what EF needs to track properly
+            // Load the report with required tracked entities
             var report = await _context.Reports
                 .AsTracking()
                 .Include(r => r.Assignees)
@@ -350,24 +345,26 @@ namespace BugReport.Controllers
 
             bool isReporter = report.ReporterId == userId;
             bool isAssignee = report.Assignees.Any(a => a.Id == userId);
+
+            // Only reporter or assignee can access
             if (!isReporter && !isAssignee)
                 return Forbid();
 
-            // Load last status (no ChangeLogs tracking)
+            // Get last status
             var lastStatusId = await _context.ChangeLogs
-                .Where(cl => cl.ReportId == model.Id)
+                .Where(cl => cl.ReportId == report.Id)
                 .OrderByDescending(cl => cl.Timestamp)
                 .Select(cl => cl.StatusId)
                 .FirstOrDefaultAsync();
 
             bool changed = false;
 
-            // --------------------------
-            // REPORTER CAN EDIT EVERYTHING
-            // --------------------------
+            // --------------------------------------
+            // REPORTER CAN EDIT ALL FIELDS
+            // --------------------------------------
             if (isReporter)
             {
-                // Title / Description changes
+                // Title / Description
                 if (report.Title != model.Title || report.Description != model.Description)
                 {
                     report.Title = model.Title;
@@ -375,57 +372,56 @@ namespace BugReport.Controllers
                     changed = true;
                 }
 
-                // --------------------------
-                // UPDATE ASSIGNEES
-                // --------------------------
-                var removeAssignees = report.Assignees
+                // --- Update assignees ---
+                if (model.Assignees == null || model.Assignees.Count == 0)
+                {
+                    ModelState.AddModelError("Assignees", "Please select at least one assignee");
+                    ViewBag.Statuses = await _context.Statuses.ToListAsync();
+                    ViewBag.IsReporter = true;
+                    return View(model);
+                }
+
+                model.Assignees ??= new List<string>();
+
+                // Remove unselected
+                var toRemove = report.Assignees
                     .Where(a => !model.Assignees.Contains(a.Id))
                     .ToList();
 
-                if (removeAssignees.Any())
-                {
-                    foreach (var a in removeAssignees)
-                        report.Assignees.Remove(a);
+                foreach (var a in toRemove)
+                    report.Assignees.Remove(a);
 
-                    changed = true;
-                }
-
-                var addIds = model.Assignees
-                    .Except(report.Assignees.Select(a => a.Id))
+                // Add new
+                var existingIds = report.Assignees.Select(a => a.Id).ToList();
+                var toAdd = model.Assignees
+                    .Where(id => !existingIds.Contains(id))
                     .ToList();
 
-                if (addIds.Any())
+                if (toAdd.Any())
                 {
-                    var addUsers = await _context.Users
-                        .Where(u => addIds.Contains(u.Id))
+                    var newUsers = await _context.Users
+                        .Where(u => toAdd.Contains(u.Id))
                         .ToListAsync();
 
-                    foreach (var u in addUsers)
+                    foreach (var u in newUsers)
                         report.Assignees.Add(u);
-
-                    changed = true;
                 }
 
-                // --------------------------
-                // REMOVE ATTACHMENTS
-                // --------------------------
-                var removeAttachments = report.Attachments
+                // --- Remove attachments ---
+                var removedAttachments = report.Attachments
                     .Where(a => !model.ExistingAttachments.Contains(a.Id))
                     .ToList();
 
-                foreach (var att in removeAttachments)
+                foreach (var att in removedAttachments)
                 {
                     if (System.IO.File.Exists(att.FilePath))
                         System.IO.File.Delete(att.FilePath);
 
-                    // ONLY remove directly from DbSet
                     _context.Attachments.Remove(att);
                     changed = true;
                 }
 
-                // --------------------------
-                // ADD NEW ATTACHMENTS
-                // --------------------------
+                // --- Add new attachments ---
                 if (model.NewAttachments != null && model.NewAttachments.Any())
                 {
                     var uploadPath = Path.Combine("wwwroot", "uploads", "reports", report.Id.ToString());
@@ -447,10 +443,7 @@ namespace BugReport.Controllers
                             ReportId = report.Id
                         };
 
-                        // Add to navigation property
                         report.Attachments.Add(newAttachment);
-
-                        // Explicitly track it so it's inserted
                         _context.Attachments.Add(newAttachment);
                     }
 
@@ -458,35 +451,44 @@ namespace BugReport.Controllers
                 }
             }
 
-            // --------------------------
-            // STATUS CHANGED?
-            // --------------------------
-            if (model.StatusId != lastStatusId)
+            // --------------------------------------
+            // STATUS UPDATE (REPORTER OR ASSIGNEE)
+            // --------------------------------------
+            bool statusChanged = model.StatusId != lastStatusId;
+
+            if (statusChanged)
             {
                 changed = true;
+
+                // Create a ChangeLog with NEW status
+                _context.ChangeLogs.Add(new ChangeLog
+                {
+                    Id = Guid.NewGuid(),
+                    ReportId = report.Id,
+                    UserId = userId!,
+                    StatusId = model.StatusId,
+                    Timestamp = DateTime.UtcNow,
+                    ChangeDescription = "Status updated"
+                });
             }
 
-            // --------------------------
-            // CREATE CHANGE LOG ENTRY
-            // --------------------------
-            if (changed)
+            // Reporter field updates (title, assignees, etc.)
+            if (isReporter && !statusChanged && changed)
             {
-                var log = new ChangeLog
+                _context.ChangeLogs.Add(new ChangeLog
                 {
                     Id = Guid.NewGuid(),
                     ReportId = report.Id,
                     UserId = userId!,
                     StatusId = lastStatusId,
                     Timestamp = DateTime.UtcNow,
-                    ChangeDescription = isReporter ? "Report updated" : "Status updated"
-                };
-
-                _context.ChangeLogs.Add(log);
+                    ChangeDescription = "Report updated"
+                });
             }
 
-            // --------------------------
+            // --------------------------------------
             // SAVE CHANGES
-            // --------------------------
+            // --------------------------------------
             try
             {
                 await _context.SaveChangesAsync();

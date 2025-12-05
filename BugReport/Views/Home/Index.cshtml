@@ -1,12 +1,14 @@
 ﻿@using BugReport.Entities
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject UserManager<User> userManager
 @inject RoleManager<IdentityRole> roleManager
+@inject IViewLocalizer localizer
 
 @{
     var user = await userManager.GetUserAsync(User);
 }
 
 <div class="main-card">
-    <h1 class="title-text text-center">Welcome, @user?.FirstName @user?.LastName!</h1>
+    <h1 class="title-text text-center">@localizer["welcome"] @user?.FirstName @user?.LastName!</h1>
 </div>
