@@ -131,6 +131,19 @@ img {
     color: #ffffff;
 }
 
+.btn-outline-red {
+    background: #ffffff;
+    border-color: var(--bs-danger);
+    font-weight: 500;
+    color: var(--bs-danger);
+    font-size: 1.1rem;
+}
+
+.btn-outline-red:hover {
+    background: var(--bs-danger);
+    font-weight: 500;
+    color: #ffffff;
+}
 
 
 .assignee-selector{

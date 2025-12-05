@@ -32,7 +32,7 @@
                 </div>
 
                 <!-- Filter reset button -->
-                <button type="button" id="resetFiltersBtn" class="btn btn-outline-secondary px-3" title="Reset filters">
+                <button type="button" id="resetFiltersBtn" class="btn btn-outline-dark-blue px-3" title="Reset filters">
                     Reset
                 </button>
             </div>
@@ -45,15 +45,15 @@
     </form>
 
     <div class="d-flex gap-2 align-items-center mb-2">
-        <select id="bulkRoleSelect" class="form-select form-select-sm" style="width:200px;">
+        <select id="bulkRoleSelect" class="form-select" style="width:250px;">
             <option value="">Select role for selected</option>
             @foreach (var role in ViewBag.Roles)
             {
                 <option value="@role">@role</option>
             }
         </select>
-        <button id="applyBulkBtn" class="btn btn-dark-blue btn-sm">Apply to selected</button>
-        <button id="clearSelectionBtn" class="btn btn-outline-secondary btn-sm">Clear selection</button>
+        <button id="applyBulkBtn" class="btn btn-dark-blue btn-sm">Apply</button>
+        <button id="clearSelectionBtn" class="btn btn-outline-dark-blue btn-sm">Clear</button>
         <div id="admin-alert-container" class="ms-auto"></div>
     </div>
 

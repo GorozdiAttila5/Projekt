@@ -1,0 +1,286 @@
+﻿@using BugReport.Models.Report
+@model EditReportViewModel
+@{
+    ViewData["Title"] = "Edit Report";
+    var isReporter = ViewBag.IsReporter;
+}
+
+<div class="main-card">
+    <h2 class="title-text text-center">Edit Report</h2>
+    <form asp-controller="Report" asp-action="Edit" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        @if (isReporter)
+        {
+            <!-- Title -->
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label fw-bold"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <!-- Assignees -->
+            <div class="mb-3">
+                <label asp-for="Assignees" class="form-label fw-bold"></label>
+                <div class="assignee-selector">
+                    <div id="assignee-tag-container" class="form-control d-flex flex-wrap align-items-center gap-2 position-relative" style="min-height: 42px; cursor: text">
+                        <input id="assignee-input" class="border-0 flex-grow-2" type="text" placeholder="Add assignees..." autocomplete="off" />
+                    </div>
+                    <div id="assignee-dropdown" class="dropdown-menu w-100 mt-1"></div>
+                    <div id="assignee-hidden">
+                        @foreach (var a in Model.Assignees)
+                        {
+                            <input type="hidden" name="Assignees[]" value="@a" data-id="@a" />
+                        }
+                    </div>
+                </div>
+                <span asp-validation-for="Assignees" class="text-danger"></span>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-bold"></label>
+                <textarea asp-for="Description" class="form-control" rows="7" style="resize:none"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <!-- Existing Attachments -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Existing Attachments</label>
+                <div id="existing-attachments" class="d-flex flex-wrap gap-2">
+                    @if (Model.Attachments is not null && Model.Attachments.Any())
+                    {
+                        @foreach (var attachment in Model.Attachments)
+                        {
+                            <div class="file-card" data-id="@attachment.Id">
+                                <div class="file-thumb icon-thumb">📄</div>
+                                <div class="file-name">@attachment.FileName</div>
+                                <input type="hidden" name="ExistingAttachments[]" value="@attachment.Id" />
+                                <button type="button" class="file-remove btn btn-sm btn-outline-danger">&times;</button>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No attachments added.</p>
+                    }
+                    
+                </div>
+            </div>
+
+            <!-- New Attachments -->
+            <div class="mb-3">
+                <label asp-for="NewAttachments" class="form-label fw-bold"></label>
+                <div id="file-dropzone" class="drop-zone border rounded bg-white p-4 text-center">
+                    <p class="text-muted">Drag and drop files here or click to browse</p>
+                    <input asp-for="NewAttachments" type="file" id="file-input" class="d-none" multiple />
+                </div>
+                <div id="file-preview" class="mt-3 d-flex flex-wrap gap-3"></div>
+                <span asp-validation-for="NewAttachments" class="text-danger"></span>
+            </div>
+        }
+        else
+        {
+            <!-- Status -->
+            <div class="mb-3">
+                <label asp-for="StatusId" class="form-label fw-bold"></label>
+                <select asp-for="StatusId" class="form-select">
+                    @foreach (var status in ViewBag.Statuses)
+                    {
+                        @if (Model.StatusId == status.Id)
+                        {
+                            <option value="@status.Id" selected>@status.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@status.Id">@status.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        }
+        <input type="submit" value="Save" class="btn btn-dark-blue w-100 p-2"/>
+        <a asp-controller="Report" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-dark-blue w-100 p-2 mt-3">Cancel</a>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        // ----- Assignee Selector -----
+        class AssigneeSelector {
+            constructor() {
+                this.container = document.getElementById("assignee-tag-container");
+                this.input = document.getElementById("assignee-input");
+                this.dropdown = document.getElementById("assignee-dropdown");
+                this.hidden = document.getElementById("assignee-hidden");
+                this.users = [];
+                this.selected = new Map();
+                this.filtered = [];
+                this.highlightIndex = -1;
+                this.init();
+            }
+
+            async init() {
+                await this.fetchUsers();
+                this.restoreExisting();
+
+                this.input.addEventListener("input", () => {
+                    this.updatePlaceholder();
+                    this.renderDropdown();
+                });
+
+                this.container.addEventListener("click", () => this.input.focus());
+                this.input.addEventListener("keydown", e => this.handleKeyDown(e));
+                this.input.addEventListener("blur", () => setTimeout(() => this.hideDropdown(), 150));
+            }
+
+            async fetchUsers() {
+                try {
+                    const res = await fetch("/User/GetUsers");
+                    const users = await res.json();
+                    this.users = users.map(u => ({ id: u.id ?? u.Id, fullName: u.fullName ?? u.FullName ?? "" }));
+                    this.renderDropdown();
+                } catch(e) { console.error(e); }
+            }
+
+            restoreExisting() {
+                const existing = Array.from(this.hidden.querySelectorAll("input")).map(i => i.value);
+                existing.forEach(id => {
+                    const user = this.users.find(u => u.id == id);
+                    if(user) this.addAssignee(user, false);
+                });
+            }
+
+            renderDropdown() {
+                const query = this.input.value.trim().toLowerCase();
+                this.dropdown.innerHTML = "";
+                this.filtered = this.users.filter(u => !this.selected.has(u.id) && u.fullName.toLowerCase().includes(query));
+                if(!this.filtered.length) return this.hideDropdown();
+
+                this.filtered.forEach((user, i) => {
+                    const item = document.createElement("div");
+                    item.className = "dropdown-item";
+                    item.textContent = user.fullName;
+                    item.dataset.index = i;
+                    item.addEventListener("mousedown", e => { e.preventDefault(); this.addAssignee(user); this.hideDropdown(); });
+                    this.dropdown.appendChild(item);
+                });
+                this.highlightIndex = 0;
+                this.applyHighlight();
+                this.dropdown.classList.add("show");
+            }
+
+            hideDropdown(){ this.dropdown.classList.remove("show"); }
+
+            handleKeyDown(e){
+                if(!this.dropdown.classList.contains("show")) return;
+                const len = this.filtered.length; if(!len) return;
+
+                switch(e.key){
+                    case "ArrowDown": e.preventDefault(); this.highlightIndex=(this.highlightIndex+1)%len; this.applyHighlight(); break;
+                    case "ArrowUp": e.preventDefault(); this.highlightIndex=(this.highlightIndex-1+len)%len; this.applyHighlight(); break;
+                    case "Enter": e.preventDefault(); const choice=this.filtered[this.highlightIndex]; if(choice){this.addAssignee(choice); this.hideDropdown();} break;
+                    case "Backspace":
+                        if(this.input.value===""){
+                            const lastId=[...this.selected.keys()].pop();
+                            if(lastId){ const tag=this.container.querySelector(`[data-id='${lastId}']`); if(tag) this.removeAssignee(lastId, tag); }
+                        }
+                        break;
+                }
+            }
+
+            applyHighlight(){ [...this.dropdown.children].forEach((item,i)=>item.classList.toggle("active",i===this.highlightIndex)); }
+
+            addAssignee(user, addHidden=true){
+                if(!user?.id || this.selected.has(user.id)) return;
+                this.selected.set(user.id, user.fullName);
+                const tag = document.createElement("span");
+                tag.className="tag"; tag.dataset.id=user.id;
+                tag.innerHTML=`${user.fullName} <span class="remove-tag">&times;</span>`;
+                tag.querySelector(".remove-tag").addEventListener("click",()=>this.removeAssignee(user.id, tag));
+                this.container.insertBefore(tag, this.input);
+
+                if(addHidden){
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.type="hidden"; hiddenInput.name="Assignees[]"; hiddenInput.value=user.id; hiddenInput.dataset.id=user.id;
+                    this.hidden.appendChild(hiddenInput);
+                }
+
+                this.input.value=""; this.updatePlaceholder(); this.renderDropdown();
+            }
+
+            removeAssignee(id, tagEl){
+                this.selected.delete(id);
+                tagEl?.remove();
+                const hidden = this.hidden.querySelector(`input[data-id='${id}']`);
+                hidden?.remove();
+                this.updatePlaceholder(); this.renderDropdown();
+            }
+
+            updatePlaceholder(){ this.input.placeholder = this.selected.size===0?"Add assignees...":""; }
+        }
+
+        // ----- Attachment Manager -----
+        class AttachmentManager {
+            constructor(){
+                this.dropzone=document.getElementById("file-dropzone");
+                this.input=document.getElementById("file-input");
+                this.preview=document.getElementById("file-preview");
+                this.files=[];
+                if(this.dropzone && this.input) this.init();
+            }
+
+            init(){
+                this.dropzone.onclick=()=>this.input.click();
+                this.input.onchange=e=>this.addFiles([...e.target.files]);
+                this.dropzone.ondragover=e=>{ e.preventDefault(); this.dropzone.classList.add("dragover"); };
+                this.dropzone.ondragleave=()=>this.dropzone.classList.remove("dragover");
+                this.dropzone.ondrop=e=>{ e.preventDefault(); this.dropzone.classList.remove("dragover"); this.addFiles([...e.dataTransfer.files]); };
+            }
+
+            addFiles(newFiles){
+                newFiles.forEach(file=>{
+                    if(this.files.some(f=>f.name===file.name && f.size===file.size)) return;
+                    this.files.push(file); this.createPreview(file);
+                });
+                this.syncInput();
+            }
+
+            getFileIcon(file){ const ext=file.name.split(".").pop().toLowerCase(); const icons={pdf:"📕",doc:"📘",docx:"📘",xls:"📗",xlsx:"📗",csv:"📗",ppt:"📙",pptx:"📙",txt:"📄",zip:"🗂️",rar:"🗂️","7z":"🗂️"}; return icons[ext]??"📁"; }
+
+            createPreview(file){
+                const wrapper=document.createElement("div"); wrapper.className="file-card";
+                wrapper.innerHTML=`<div class="file-thumb icon-thumb">${this.getFileIcon(file)}</div><div class="file-name">${file.name}</div><button class="file-remove btn btn-sm btn-outline-danger">&times;</button>`;
+                this.preview.appendChild(wrapper);
+
+                if(file.type.startsWith("image/")){ const reader=new FileReader(); reader.onload=e=>{ const thumb=wrapper.querySelector(".file-thumb"); thumb.classList.add("image-thumb"); thumb.innerHTML=`<img src="${e.target.result}" />`; }; reader.readAsDataURL(file); }
+
+                wrapper.querySelector(".file-remove").onclick=()=>{
+                    this.files=this.files.filter(f=>f!==file);
+                    wrapper.remove();
+                    this.syncInput();
+                };
+            }
+
+            syncInput(){ const dt=new DataTransfer(); this.files.forEach(f=>dt.items.add(f)); this.input.files=dt.files; }
+        }
+
+        document.addEventListener("DOMContentLoaded",()=>{
+            new AssigneeSelector();
+            new AttachmentManager();
+
+            // Remove existing attachments
+            document.querySelectorAll("#existing-attachments .file-remove").forEach(btn=>{
+                btn.addEventListener("click",()=>{
+                    const card = btn.closest(".file-card");
+                    if(!card) return;
+                    const hidden = card.querySelector("input[type='hidden']");
+                    hidden?.remove();
+                    card.remove();
+                });
+            });
+        });
+    </script>
+}
