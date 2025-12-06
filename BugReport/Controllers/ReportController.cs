@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System.Data;
 
 namespace BugReport.Controllers
@@ -14,15 +15,18 @@ namespace BugReport.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IStringLocalizer<ReportController> _localizer;
 
         public ReportController
         (
             ApplicationDbContext context,
-            UserManager<User> userManager
+            UserManager<User> userManager,
+            IStringLocalizer<ReportController> localizer
         )
         {
             _context = context;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -111,7 +115,7 @@ namespace BugReport.Controllers
 
             if(reporter is null)
             {
-                TempData["ErrorToast"] = "You must be logged in";
+                TempData["ErrorToast"] = _localizer["not-logged-in-error"];
                 return View(model);
             }
 
@@ -121,7 +125,7 @@ namespace BugReport.Controllers
 
             if (!assignees.Any())
             {
-                TempData["ErrorToast"] = "Please select at least one valid assignee";
+                TempData["ErrorToast"] = _localizer["select-assignee-error"];
                 return View(model);
             }
 
@@ -166,7 +170,7 @@ namespace BugReport.Controllers
 
             if (status is null)
             {
-                TempData["ErrorToast"] = "Default status not found";
+                TempData["ErrorToast"] = _localizer["status-not-found-error"];
                 return View(model);
             }
 
@@ -181,7 +185,7 @@ namespace BugReport.Controllers
             _context.Reports.Add(report);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessToast"] = "Report created successfully";
+            TempData["SuccessToast"] = _localizer["create-success"];
             return RedirectToAction("Index", "Report");
         }
 

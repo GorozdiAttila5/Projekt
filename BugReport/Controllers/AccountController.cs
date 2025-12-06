@@ -2,6 +2,7 @@
 using BugReport.Models.Account;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BugReport.Controllers
@@ -11,17 +12,20 @@ namespace BugReport.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IStringLocalizer<AccountController> _localizer;
 
         public AccountController
         (
             SignInManager<User> signInManager,
             UserManager<User> userManager,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            IStringLocalizer<AccountController> localizer
         )
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
+            _localizer = localizer;
         }
 
 
@@ -85,7 +89,7 @@ namespace BugReport.Controllers
                 lockoutOnFailure: false);
             if (!result.Succeeded)
             {
-                TempData["ErrorToast"] = "Invalid login attempt!";
+                TempData["ErrorToast"] = _localizer["invalid-login"];
 
                 return View(model);
             }

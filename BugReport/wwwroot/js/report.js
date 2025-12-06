@@ -214,7 +214,8 @@
     }
 
     updatePlaceholder() {
-        this.input.placeholder = this.selected.size === 0 ? "Add assignees..." : "";
+        const placeholderText = this.container.dataset.placeholder || "Add assignees...";
+        this.input.placeholder = this.selected.size === 0 ? placeholderText : "";
     }
 }
 

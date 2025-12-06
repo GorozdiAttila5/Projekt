@@ -135,4 +135,22 @@
   <data name="student" xml:space="preserve">
     <value>Hallgatói</value>
   </data>
+  <data name="login-name" xml:space="preserve">
+    <value>Bejelentkezési név</value>
+  </data>
+  <data name="login-name-placeholder" xml:space="preserve">
+    <value>Adja meg bejelentkezési nevét</value>
+  </data>
+  <data name="password" xml:space="preserve">
+    <value>Jelszó</value>
+  </data>
+  <data name="password-placeholder" xml:space="preserve">
+    <value>Adja meg jelszavát</value>
+  </data>
+  <data name="remember-me" xml:space="preserve">
+    <value>Emlékezz rám</value>
+  </data>
+  <data name="invalid-login" xml:space="preserve">
+    <value>Érvénytelen bejelentkezési kísérlet!</value>
+  </data>
 </root>

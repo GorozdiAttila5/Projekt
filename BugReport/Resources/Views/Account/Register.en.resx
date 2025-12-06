@@ -132,4 +132,43 @@
   <data name="student" xml:space="preserve">
     <value>Student</value>
   </data>
+  <data name="email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="username" xml:space="preserve">
+    <value>Login name</value>
+  </data>
+  <data name="firstname" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="lastname" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="confirm-password" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="register-button" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="email-placeholder" xml:space="preserve">
+    <value>Enter your email</value>
+  </data>
+  <data name="username-placeholder" xml:space="preserve">
+    <value>Enter your login name</value>
+  </data>
+  <data name="firstname-placeholder" xml:space="preserve">
+    <value>Enter your first name</value>
+  </data>
+  <data name="lastname-placeholder" xml:space="preserve">
+    <value>Enter your last name</value>
+  </data>
+  <data name="password-placeholder" xml:space="preserve">
+    <value>Enter your password</value>
+  </data>
+  <data name="confirm-password-placeholder" xml:space="preserve">
+    <value>Confirm your password</value>
+  </data>
 </root>

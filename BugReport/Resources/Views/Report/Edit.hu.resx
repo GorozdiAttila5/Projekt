@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="edit-report" xml:space="preserve">
+    <value>Jelentés szerkesztése</value>
+  </data>
+  <data name="title" xml:space="preserve">
+    <value>Cím</value>
+  </data>
+  <data name="title-placeholder" xml:space="preserve">
+    <value>Cím</value>
+  </data>
+  <data name="assignees" xml:space="preserve">
+    <value>Felelősök</value>
+  </data>
+  <data name="add-assignees-placeholder" xml:space="preserve">
+    <value>Felelősök hozzáadása...</value>
+  </data>
+  <data name="description" xml:space="preserve">
+    <value>Leírás</value>
+  </data>
+  <data name="description-placeholder" xml:space="preserve">
+    <value>Leírás</value>
+  </data>
+  <data name="existing-attachments" xml:space="preserve">
+    <value>Meglévő mellékletek</value>
+  </data>
+  <data name="no-attachments" xml:space="preserve">
+    <value>Nincs melléklet hozzáadva.</value>
+  </data>
+  <data name="new-attachments" xml:space="preserve">
+    <value>Új mellékletek</value>
+  </data>
+  <data name="drag-and-drop" xml:space="preserve">
+    <value>Húzza ide a fájlokat, vagy kattintson a böngészéshez</value>
+  </data>
+  <data name="status" xml:space="preserve">
+    <value>Állapot</value>
+  </data>
+  <data name="save" xml:space="preserve">
+    <value>Mentés</value>
+  </data>
+  <data name="cancel" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="title-required-error" xml:space="preserve">
+    <value>A cím megadása kötelező</value>
+  </data>
+  <data name="title-maxlength-error" xml:space="preserve">
+    <value>A cím nem haladhatja meg a 125 karaktert</value>
+  </data>
+  <data name="assignees-required-error" xml:space="preserve">
+    <value>Adjon meg legalább egy felelőst</value>
+  </data>
+  <data name="description-required-error" xml:space="preserve">
+    <value>A leírás megadása kötelező</value>
+  </data>
+</root>

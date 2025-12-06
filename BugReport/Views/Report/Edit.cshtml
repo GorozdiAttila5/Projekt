@@ -1,12 +1,14 @@
 ﻿@using BugReport.Models.Report
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer localizer
 @model EditReportViewModel
 @{
-    ViewData["Title"] = "Edit Report";
+    ViewData["Title"] = localizer["edit-report"];
     var isReporter = ViewBag.IsReporter;
 }
 
 <div class="main-card">
-    <h2 class="title-text text-center">Edit Report</h2>
+    <h2 class="title-text text-center">@localizer["edit-report"]</h2>
     <form asp-controller="Report" asp-action="Edit" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id" />
@@ -15,17 +17,17 @@
         {
             <!-- Title -->
             <div class="mb-3">
-                <label asp-for="Title" class="form-label fw-bold"></label>
-                <input asp-for="Title" class="form-control" />
+                <label asp-for="Title" class="form-label fw-bold">@localizer["title"]</label>
+                <input asp-for="Title" class="form-control" placeholder="@localizer["title-placeholder"]" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <!-- Assignees -->
             <div class="mb-3">
-                <label asp-for="Assignees" class="form-label fw-bold"></label>
+                <label asp-for="Assignees" class="form-label fw-bold">@localizer["assignees"]</label>
                 <div class="assignee-selector">
-                    <div id="assignee-tag-container" class="form-control d-flex flex-wrap align-items-center gap-2 position-relative" style="min-height: 42px; cursor: text">
-                        <input id="assignee-input" class="border-0 flex-grow-2" type="text" placeholder="Add assignees..." autocomplete="off" />
+                    <div id="assignee-tag-container" class="form-control d-flex flex-wrap align-items-center gap-2 position-relative" style="min-height: 42px; cursor: text" data-placeholder="@localizer["add-assignees-placeholder"]">
+                        <input id="assignee-input" class="border-0 flex-grow-2" type="text" placeholder="@localizer["add-assignees-placeholder"]" autocomplete="off" />
                     </div>
                     <div id="assignee-dropdown" class="dropdown-menu w-100 mt-1"></div>
                     <div id="assignee-hidden">
@@ -40,14 +42,14 @@
 
             <!-- Description -->
             <div class="mb-3">
-                <label asp-for="Description" class="form-label fw-bold"></label>
-                <textarea asp-for="Description" class="form-control" rows="7" style="resize:none"></textarea>
+                <label asp-for="Description" class="form-label fw-bold">@localizer["description"]</label>
+                <textarea asp-for="Description" class="form-control" rows="7" style="resize:none" placeholder="@localizer["description-placeholder"]"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
             <!-- Existing Attachments -->
             <div class="mb-3">
-                <label class="form-label fw-bold">Existing Attachments</label>
+                <label class="form-label fw-bold">@localizer["existing-attachments"]</label>
                 <div id="existing-attachments" class="d-flex flex-wrap gap-2">
                     @if (Model.Attachments is not null && Model.Attachments.Any())
                     {
@@ -63,7 +65,7 @@
                     }
                     else
                     {
-                        <p class="text-muted">No attachments added.</p>
+                        <p class="text-muted">@localizer["no-attachments"]</p>
                     }
                     
                 </div>
@@ -71,9 +73,9 @@
 
             <!-- New Attachments -->
             <div class="mb-3">
-                <label asp-for="NewAttachments" class="form-label fw-bold"></label>
+                <label asp-for="NewAttachments" class="form-label fw-bold">@localizer["new-attachments"]</label>
                 <div id="file-dropzone" class="drop-zone border rounded bg-white p-4 text-center">
-                    <p class="text-muted">Drag and drop files here or click to browse</p>
+                    <p class="text-muted">@localizer["drag-and-drop"]</p>
                     <input asp-for="NewAttachments" type="file" id="file-input" class="d-none" multiple />
                 </div>
                 <div id="file-preview" class="mt-3 d-flex flex-wrap gap-3"></div>
@@ -84,7 +86,7 @@
         {
             <!-- Status -->
             <div class="mb-3">
-                <label asp-for="StatusId" class="form-label fw-bold"></label>
+                <label asp-for="StatusId" class="form-label fw-bold">@localizer["status"]</label>
                 <select asp-for="StatusId" class="form-select">
                     @foreach (var status in ViewBag.Statuses)
                     {
@@ -100,8 +102,8 @@
                 </select>
             </div>
         }
-        <input type="submit" value="Save" class="btn btn-dark-blue w-100 p-2"/>
-        <a asp-controller="Report" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-dark-blue w-100 p-2 mt-3">Cancel</a>
+        <input type="submit" value="@localizer["save"]" class="btn btn-dark-blue w-100 p-2"/>
+        <a asp-controller="Report" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-dark-blue w-100 p-2 mt-3">@localizer["cancel"]</a>
     </form>
 </div>
 
@@ -219,7 +221,7 @@
                 this.updatePlaceholder(); this.renderDropdown();
             }
 
-            updatePlaceholder(){ this.input.placeholder = this.selected.size===0?"Add assignees...":""; }
+            updatePlaceholder(){ this.input.placeholder = this.selected.size===0?"@localizer["add-assignees-placeholder"]":""; }
         }
 
         // ----- Attachment Manager -----

@@ -1,20 +1,22 @@
 ﻿@using BugReport.Models.Report;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer localizer
 @model List<ReportViewModel>
 @{
-    ViewData["Title"] = "Reports";
+    ViewData["Title"] = localizer["reports"];
 }
 
 <div class="main-card">
     <form asp-controller="Report" asp-action="Index" method="get">
         <div class="row align-items-center g-3">
             <div class="col-12 col-md-6">
-                <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="Search reports..." />
+                <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@localizer["search-reports-placeholder"]" />
             </div>
 
             <div class="col-auto d-flex justify-content-start justify-content-md-center gap-3">
                 <div class="dropdown">
                     <button class="btn btn-outline-dark-blue px-4 dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        Filter Status
+                        @localizer["filter-status"]
                     </button>
                     <ul class="dropdown-menu p-3" aria-labelledby="statsDropdown" style="min-width:200px;">
                         @foreach (var status in ViewBag.Statuses)
@@ -22,12 +24,12 @@
                             <li>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="statuses" value="@status" id="status_@status">
-                                    <label class="form-check-label" for="status_@status">@status</label>
+                                    <label class="form-check-label" for="status_@status">@GetLocalizedStatusName(status, localizer)</label>
                                 </div>
                             </li>
                         }
                         <li class="dropdown-divider"></li>
-                        <button type="submit" class="btn btn-dark-blue px-4 w-100">Filter</button>
+                        <button type="submit" class="btn btn-dark-blue px-4 w-100">@localizer["filter"]</button>
                     </ul>
                 </div>
 
@@ -36,7 +38,7 @@
             {
                 <div class="col-auto ms-auto">
                     <a asp-controller="Report" asp-action="Create" class="btn btn-dark-blue px-4 py-2">
-                        New report
+                        @localizer["new-report"]
                     </a>
                 </div>
             }
@@ -47,9 +49,9 @@
         <table class="table align-middle report-table">
             <thead class="px-2 mt-4">
                 <tr>
-                    <th>From</th>
-                    <th>Title</th>
-                    <th class="text-end">Modified</th>
+                    <th>@localizer["from"]</th>
+                    <th>@localizer["title"]</th>
+                    <th class="text-end">@localizer["modified"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,7 +61,7 @@
                     {
                         <tr class="clickable-row" data-href="@Url.Action("Details", "Report", new { id = item.Report.Id })">
                             <td>
-                                @(item.Report.Reporter != null ? $"{item.Report.Reporter.FirstName} {item.Report.Reporter.LastName}" : "Unknown")
+                                @(item.Report.Reporter != null ? $"{item.Report.Reporter.FirstName} {item.Report.Reporter.LastName}" : localizer["unknown"])
                             </td>
                             <td class="text-truncate title-cell justify-content-between" style="max-width:250px" title="@item.Report.Title">
                                 @item.Report.Title
@@ -79,7 +81,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="100%" class="title-text text-center">No report found</td>
+                        <td colspan="100%" class="title-text text-center">@localizer["no-report-found"]</td>
                     </tr>
                 }
             </tbody>
@@ -95,6 +97,19 @@
         "BLOCKED" => "bg-warning",
         _ => "bg-dark"
     };
+
+    public string GetLocalizedStatusName(string status, IViewLocalizer localizer)
+    {
+        return status switch
+        {
+            "Incoming" => localizer["status-incoming"].Value,
+            "In progress" => localizer["status-in-progress"].Value,
+            "Resolved" => localizer["status-resolved"].Value,
+            "Rejected" => localizer["status-rejected"].Value,
+            "Blocked" => localizer["status-blocked"].Value,
+            _ => status
+        };
+    }
 }
 
 <script>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="reports" xml:space="preserve">
+    <value>Reports</value>
+  </data>
+  <data name="search-reports-placeholder" xml:space="preserve">
+    <value>Search reports...</value>
+  </data>
+  <data name="filter-status" xml:space="preserve">
+    <value>Filter Status</value>
+  </data>
+  <data name="filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="new-report" xml:space="preserve">
+    <value>New report</value>
+  </data>
+  <data name="from" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="no-report-found" xml:space="preserve">
+    <value>No report found</value>
+  </data>
+  <data name="status-incoming" xml:space="preserve">
+    <value>Incoming</value>
+  </data>
+  <data name="status-in-progress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
+  <data name="status-resolved" xml:space="preserve">
+    <value>Resolved</value>
+  </data>
+  <data name="status-rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="status-blocked" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+</root>

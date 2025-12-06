@@ -1,6 +1,7 @@
 :root {
     --main-color: #1C2542;
     --main-color-active: #151C31;
+    --input-border: #ced4da;
 }
 
 * {
@@ -322,4 +323,49 @@ img {
 
 input[type="checkbox"]{
     accent-color: var(--main-color)
+}
+
+/* Password toggle button styling */
+.input-group > .form-control {
+    border-right: 0;
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}
+.input-group > .toggle-password {
+    border: 1px solid var(--input-border);
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    padding: .375rem .5rem;
+    cursor: pointer;
+    color: var(--main-color);
+}
+.input-group > .toggle-password:focus {
+    outline: none;
+    box-shadow: none;
+}
+.toggle-password svg { display: block; }
+.toggle-password .eye { fill: currentColor; transition: fill .12s ease; }
+.toggle-password .pupil { fill: #fff; }
+.toggle-password .slash { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; opacity: 0; transition: opacity .12s ease, stroke .12s ease; }
+
+/* Pressed/crossed state: eye blends into background, slash visible */
+.toggle-password[aria-pressed="true"] {
+    background: #fff;
+    /* keep the border visible and matching the input box */
+    border-color: var(--input-border);
+    color: var(--main-color);
+}
+.toggle-password[aria-pressed="true"] .eye {
+    /* keep the eye visible and use currentColor so it contrasts with the button */
+    fill: currentColor;
+}
+.toggle-password .eye { fill: currentColor; }
+.toggle-password .pupil { fill: #fff; }
+.toggle-password[aria-pressed="true"] .slash {
+    opacity: 1;
+    stroke: var(--main-color);
 }

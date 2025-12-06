@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="reports" xml:space="preserve">
+    <value>Jelentések</value>
+  </data>
+  <data name="search-reports-placeholder" xml:space="preserve">
+    <value>Jelentések keresése...</value>
+  </data>
+  <data name="filter-status" xml:space="preserve">
+    <value>Állapot szűrése</value>
+  </data>
+  <data name="filter" xml:space="preserve">
+    <value>Szűrés</value>
+  </data>
+  <data name="new-report" xml:space="preserve">
+    <value>Új jelentés</value>
+  </data>
+  <data name="from" xml:space="preserve">
+    <value>Feladó</value>
+  </data>
+  <data name="title" xml:space="preserve">
+    <value>Cím</value>
+  </data>
+  <data name="modified" xml:space="preserve">
+    <value>Módosítva</value>
+  </data>
+  <data name="unknown" xml:space="preserve">
+    <value>Ismeretlen</value>
+  </data>
+  <data name="no-report-found" xml:space="preserve">
+    <value>Nincs találat</value>
+  </data>
+  <data name="status-incoming" xml:space="preserve">
+    <value>Beérkezett</value>
+  </data>
+  <data name="status-in-progress" xml:space="preserve">
+    <value>Folyamatban</value>
+  </data>
+  <data name="status-resolved" xml:space="preserve">
+    <value>Megoldva</value>
+  </data>
+  <data name="status-rejected" xml:space="preserve">
+    <value>Elutasítva</value>
+  </data>
+  <data name="status-blocked" xml:space="preserve">
+    <value>Zárolva</value>
+  </data>
+</root>

@@ -49,11 +49,11 @@
     <ul class="navbar-nav p-3">
         <li class="nav-item">
             <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                @System.Globalization.CultureInfo.CurrentCulture.DisplayName
+                @(System.Globalization.CultureInfo.CurrentCulture.Name == "hu" ? "Magyar" : "English")
             </a>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" asp-controller="Language" asp-action="Index" asp-route-culture="en">En</a></li>
-                <li><a class="dropdown-item" asp-controller="Language" asp-action="Index" asp-route-culture="hu">Hu</a></li>
+                <li><a class="dropdown-item" asp-controller="Language" asp-action="Index" asp-route-culture="en">English</a></li>
+                <li><a class="dropdown-item" asp-controller="Language" asp-action="Index" asp-route-culture="hu">Magyar</a></li>
             </ul>
         </li>
     </ul>
