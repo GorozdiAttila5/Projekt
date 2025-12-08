@@ -6,16 +6,16 @@ namespace BugReport.Models.Account
     {
         public required string Id { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "{0} is required")]
-        [MinLength(8, ErrorMessage = "{0} must be at least {1} characters")]
+        [Required(ErrorMessage = "password")]
+        [MinLength(8, ErrorMessage = "password-regex")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password", Prompt = "Password")]
+        [Display(Name = "password", Prompt = "password")]
         public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "{0} is required")]
+        [Required(ErrorMessage = "confirm-password-required")]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password", Prompt = "Confirm password")]
-        [Compare("Password", ErrorMessage = "Password does not match")]
+        [Display(Name = "confirm-password", Prompt = "confirm-password")]
+        [Compare(nameof(Password), ErrorMessage = "password-not-match")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

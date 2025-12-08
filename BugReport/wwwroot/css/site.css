@@ -1,7 +1,7 @@
 :root {
     --main-color: #1C2542;
     --main-color-active: #151C31;
-    --input-border: #ced4da;
+    --input-border: #CED4DA;
 }
 
 * {
@@ -26,7 +26,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .account-card {
@@ -368,4 +368,178 @@ input[type="checkbox"]{
 .toggle-password[aria-pressed="true"] .slash {
     opacity: 1;
     stroke: var(--main-color);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+:root {
+    --card-bg: #ffffff;
+    --card-border: #e7e7e7;
+    --soft-shadow: 0 4px 14px rgba(0,0,0,.08);
+    --soft-shadow-hover: 0 6px 16px rgba(0,0,0,.12);
+}
+
+/* ===== Layout ===== */
+.main-card {
+    padding: 2rem;
+}
+
+.modern-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--soft-shadow);
+    border: 1px solid var(--card-border);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-header-modern {
+    background: #f5f5f7;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.card-body-modern {
+    padding: 1.25rem;
+}
+
+/* ===== Attachments ===== */
+.attachment-card {
+    background: #fff;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    transition: all .2s;
+    box-shadow: var(--soft-shadow);
+    height: 100%;
+}
+
+    .attachment-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--soft-shadow-hover);
+    }
+
+.attachment-thumb {
+    height: 150px;
+    width: 100%;
+    border-radius: 8px;
+    background: #f1f1f1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .attachment-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.attachment-name {
+    font-size: .85rem;
+    margin-top: 6px;
+    word-break: break-word;
+}
+
+.file-icon {
+    font-size: 4.5rem;
+}
+
+/* ===== Messages ===== */
+.msg-item {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.msg-avatar {
+    width: 44px;
+    height: 44px;
+    background: var(--main-color);
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: .75rem;
+}
+
+.msg-bubble {
+    background: #fafafa;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    width: 100%;
+}
+
+/* ===== Activity Feed ===== */
+.activity-entry {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.activity-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--main-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.activity-box {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+/* ===== Modals ===== */
+.modal-content {
+    border-radius: 12px !important;
+    box-shadow: var(--soft-shadow);
+    border: none;
+}
+
+.modal-header {
+    background: #343a40;
+    color: white;
+    border-bottom: none;
+}
+
+.modal-body {
+    overflow-x: hidden;
+}
+
+/* ===== Image Gallery Modal ===== */
+#imageGalleryModal .modal-content {
+    background: #111;
+    color: white;
+}
+
+#galleryImage {
+    max-height: 70vh;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+#galleryPrev,
+#galleryNext {
+    border-radius: 50%;
+    opacity: .85;
+    padding: .75rem 1rem;
 }

@@ -117,58 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="already-have-an-account" xml:space="preserve">
-    <value>Már van fiókod?</value>
-  </data>
-  <data name="error-reporting" xml:space="preserve">
-    <value>Hibabejelentő</value>
-  </data>
   <data name="login" xml:space="preserve">
     <value>Bejelentkezés</value>
   </data>
   <data name="register" xml:space="preserve">
     <value>Regisztráció</value>
   </data>
-  <data name="student" xml:space="preserve">
-    <value>Hallgatói</value>
-  </data>
-  <data name="email" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="username" xml:space="preserve">
-    <value>Bejelentkezési név</value>
-  </data>
-  <data name="firstname" xml:space="preserve">
-    <value>Keresztnév</value>
-  </data>
-  <data name="lastname" xml:space="preserve">
-    <value>Vezetéknév</value>
-  </data>
-  <data name="password" xml:space="preserve">
-    <value>Jelszó</value>
-  </data>
-  <data name="confirm-password" xml:space="preserve">
-    <value>Jelszó megerősítése</value>
-  </data>
-  <data name="register-button" xml:space="preserve">
-    <value>Regisztráció</value>
-  </data>
-  <data name="email-placeholder" xml:space="preserve">
-    <value>Adja meg e-mail címét</value>
-  </data>
-  <data name="username-placeholder" xml:space="preserve">
-    <value>Adja meg bejelentkezési nevét</value>
-  </data>
-  <data name="firstname-placeholder" xml:space="preserve">
-    <value>Adja meg keresztnevét</value>
-  </data>
-  <data name="lastname-placeholder" xml:space="preserve">
-    <value>Adja meg vezetéknevét</value>
-  </data>
-  <data name="password-placeholder" xml:space="preserve">
-    <value>Adja meg jelszavát</value>
-  </data>
-  <data name="confirm-password-placeholder" xml:space="preserve">
-    <value>Erősítse meg jelszavát</value>
+  <data name="already-have-an-account" xml:space="preserve">
+    <value>Már van fiókod?</value>
   </data>
 </root>

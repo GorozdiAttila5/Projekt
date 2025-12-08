@@ -3,7 +3,6 @@ using BugReport.Models.Account;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BugReport.Controllers
 {
@@ -36,6 +35,8 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            string temp = string.Empty;
+
             if(!ModelState.IsValid)
                 return View(model);
 
@@ -50,12 +51,13 @@ namespace BugReport.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
-                string errors = "";
+                temp = _localizer["invalid-register"];
+                List<string> errors = new List<string>();
 
                 foreach (var error in result.Errors)
-                    errors += error.Description + "\n";
+                    errors.Add(error.Description);
 
-                TempData["ErrorToast"] = errors;
+                TempData["ErrorToast"] = temp + string.Join('\n', errors);
 
                 return View(model);
             }
@@ -68,7 +70,9 @@ namespace BugReport.Controllers
 
             await _signInManager.SignInAsync(user, isPersistent: true);
 
-            TempData["SuccessToast"] = "User registerd successfully.";
+            temp = _localizer["successful-register"];
+            TempData["SuccessToast"] = temp;
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -79,6 +83,8 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
+            string temp = string.Empty;
+
             if(!ModelState.IsValid)
                 return View(model);
 
@@ -89,12 +95,14 @@ namespace BugReport.Controllers
                 lockoutOnFailure: false);
             if (!result.Succeeded)
             {
-                TempData["ErrorToast"] = _localizer["invalid-login"];
+                temp = _localizer["invalid-login"];
+                TempData["ErrorToast"] = temp;
 
                 return View(model);
             }
 
-            TempData["SuccessToast"] = "User logged in successfully.";
+            temp = _localizer["successful-login"];
+            TempData["SuccessToast"] = temp;
             return RedirectToAction("Index", "Home");
         }
 
@@ -105,6 +113,7 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(VerifyEmailViewModel model)
         {
+            string temp = string.Empty;
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -112,12 +121,14 @@ namespace BugReport.Controllers
 
             if (user is null)
             {
-                TempData["ErrorToast"] = "User not found!";
+                temp = _localizer["user-not-found"];
+                TempData["ErrorToast"] = temp;
 
                 return View(model);
             }
 
-            TempData["SuccessToast"] = $"Email has been sent.";
+            temp = _localizer["email-sent"];
+            TempData["SuccessToast"] = temp;
             return RedirectToAction("ResetPassword", new { id = user.Id, });
         }
 
@@ -134,6 +145,8 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
+            string temp = string.Empty;
+
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -141,26 +154,25 @@ namespace BugReport.Controllers
 
             if(user is null)
             {
-                TempData["ErrorToast"] = "User not found!";
+                temp = _localizer["user-not-found"];
+                TempData["ErrorToast"] = temp;
+
                 return View(model);
             }
 
             var result = await _userManager.RemovePasswordAsync(user);
             if (!result.Succeeded)
             {
-                string errors = "";
-
-                foreach (var error in result.Errors)
-                    errors += error.Description + "\n";
-
-                TempData["ErrorToast"] = errors;
+                temp = _localizer["invalid-password-reset"];
+                TempData["ErrorToast"] = temp;
 
                 return View(model);
             }
 
             result = await _userManager.AddPasswordAsync(user, model.Password);
 
-            TempData["SuccessToast"] = "Password reset successfully.";
+            temp = _localizer["successful-password-reset"];
+            TempData["SuccessToast"] = temp;
             return RedirectToAction("Login");
         }
 
@@ -168,9 +180,11 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            string temp = string.Empty;
             await _signInManager.SignOutAsync();
 
-            TempData["SuccessToast"] = "User logged out successfully.";
+            temp = _localizer["successful-logout"];
+            TempData["SuccessToast"] = temp;
             return RedirectToAction("Login");
         }
     }

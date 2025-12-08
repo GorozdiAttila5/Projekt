@@ -1,6 +1,4 @@
-﻿using BugReport.Entities;
-using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BugReport.Models.Report
 {
@@ -25,8 +23,8 @@ namespace BugReport.Models.Report
         public List<Guid> ExistingAttachments { get; set; } = new();
         public List<IFormFile> NewAttachments { get; set; } = new();
 
-        [Display(Name = "Status", Prompt = "Status")]
-        public Guid StatusId { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
 
 

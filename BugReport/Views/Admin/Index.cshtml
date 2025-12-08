@@ -1,20 +1,23 @@
 ﻿@using BugReport.Models.Admin
+@using Microsoft.AspNetCore.Mvc.Localization
+@using System.Linq;
+@inject IViewLocalizer localizer
 @model List<UserRoleViewModel>
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = localizer["dashboard"];
 }
 
 <div class="main-card">
     <form asp-controller="Admin" asp-action="Index" method="get" class="mb-3" id="adminFilterForm">
         <div class="row align-items-center g-3">    
             <div class="col-12 col-md-6">
-                <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="Search users..." />
+                <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@localizer["search-users"]" />
             </div>
 
             <div class="col-auto d-flex justify-content-start justify-content-md-center gap-3">
                 <div class="dropdown">
                     <button class="btn btn-outline-dark-blue px-4 dropdown-toggle" type="button" id="roleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        Filter Role
+                        @localizer["filter-role"]
                     </button>
                     <ul class="dropdown-menu p-3" aria-labelledby="roleDropdown" style="min-width:200px;">
                         @foreach (var role in ViewBag.Roles)
@@ -22,18 +25,20 @@
                             <li>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="roles" value="@role" id="role_@role">
-                                    <label class="form-check-label" for="role_@role">@role</label>
+                                    <label class="form-check-label" for="role_@role">
+                                        @LocalizeRoleName(role, localizer)
+                                    </label>
                                 </div>
                             </li>
                         }
                         <li class="dropdown-divider"></li>
-                        <button type="submit" class="btn btn-dark-blue px-4 w-100">Filter</button>
+                        <button type="submit" class="btn btn-dark-blue px-4 w-100">@localizer["filter"]</button>
                     </ul>
                 </div>
 
                 <!-- Filter reset button -->
                 <button type="button" id="resetFiltersBtn" class="btn btn-outline-dark-blue px-3" title="Reset filters">
-                    Reset
+                    @localizer["reset"]
                 </button>
             </div>
         </div>
@@ -46,14 +51,16 @@
 
     <div class="d-flex gap-2 align-items-center mb-2">
         <select id="bulkRoleSelect" class="form-select" style="width:250px;">
-            <option value="">Select role for selected</option>
+            <option value="">@localizer["select-role"]</option>
             @foreach (var role in ViewBag.Roles)
             {
-                <option value="@role">@role</option>
+                <option value="@role">
+                    @LocalizeRoleName(role, localizer)
+                </option>
             }
         </select>
-        <button id="applyBulkBtn" class="btn btn-dark-blue btn-sm">Apply</button>
-        <button id="clearSelectionBtn" class="btn btn-outline-dark-blue btn-sm">Clear</button>
+        <button id="applyBulkBtn" class="btn btn-dark-blue btn-sm">@localizer["apply"]</button>
+        <button id="clearSelectionBtn" class="btn btn-outline-dark-blue btn-sm">@localizer["clear"]</button>
         <div id="admin-alert-container" class="ms-auto"></div>
     </div>
 
@@ -64,9 +71,9 @@
                     <th>
                         <input type="checkbox" id="selectAll" />
                     </th>
-                    <th>User name</th>
-                    <th>Name</th>
-                    <th>Role</th>
+                    <th>@localizer["login-name"]</th>
+                    <th>@localizer["name"]</th>
+                    <th>@localizer["role"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,20 +87,43 @@
                             </td>
                             <td>@user.User.UserName</td>
                             <td>@user.User.FirstName @user.User.LastName</td>
-                            <td>@string.Join(", ", user.Roles)</td>
+                            <td>@string.Join(", ", GetLocalizedRole(user.Roles))</td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="100%" class="title-text text-center">No user found</td>
+                        <td colspan="100%" class="title-text text-center">@localizer["no-user-found"]</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+@functions {
+    public List<string> GetLocalizedRole(IEnumerable<string> roles)
+    {
+        var localizedRoles = new List<string>();
+        foreach (var r in roles)
+        {
+            localizedRoles.Add(LocalizeRoleName(r, localizer));
+        }
+        return localizedRoles;
+    }
+
+    public string LocalizeRoleName(string role, IViewLocalizer localizer)
+    {
+        return role switch
+        {
+            "Admin" => localizer["role-admin"].Value,
+            "Instructor" => localizer["role-instructor"].Value,
+            "Student" => localizer["role-student"].Value,
+            _ => role
+        };
+    }
+}
 
 @section Scripts{
     <script>

@@ -11,32 +11,32 @@
 <form asp-action="Register" method="post">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label asp-for="Email" class="form-label">@localizer["email"]</label>
-        <input asp-for="Email" class="form-control" placeholder="@localizer["email-placeholder"]" />
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="UserName" class="form-label">@localizer["username"]</label>
+        <label asp-for="UserName" class="form-label"></label>
         <input asp-for="UserName" class="form-control"
-               maxlength="6" oninput="this.value = this.value.toUpperCase()" placeholder="@localizer["username-placeholder"]" />
+               maxlength="6" oninput="this.value = this.value.toUpperCase()" />
         <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
     <div class="row">
         <div class="col mb-3 col-md-6 col-12">
-            <label asp-for="FirstName" class="form-label">@localizer["firstname"]</label>
-            <input asp-for="FirstName" class="form-control" placeholder="@localizer["firstname-placeholder"]" />
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
             <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
         <div class="col mb-3 col-md-6 col-12">
-            <label asp-for="LastName" class="form-label">@localizer["lastname"]</label>
-            <input asp-for="LastName" class="form-control" placeholder="@localizer["lastname-placeholder"]" />
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
             <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
     </div>
     <div class="mb-3">
-        <label asp-for="Password" class="form-label">@localizer["password"]</label>
+        <label asp-for="Password" class="form-label"></label>
         <div class="input-group">
-            <input asp-for="Password" class="form-control" placeholder="@localizer["password-placeholder"]" />
+            <input asp-for="Password" class="form-control" />
             <button type="button" class="btn btn-outline-secondary toggle-password" title="Show password" aria-label="Show password">
                 <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" role="img" aria-hidden="true">
                     <path class="eye" d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8z"/>
@@ -47,9 +47,9 @@
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="ConfirmPassword" class="form-label">@localizer["confirm-password"]</label>
+        <label asp-for="ConfirmPassword" class="form-label"></label>
         <div class="input-group">
-            <input asp-for="ConfirmPassword" class="form-control" placeholder="@localizer["confirm-password-placeholder"]" />
+            <input asp-for="ConfirmPassword" class="form-control" />
             <button type="button" class="btn btn-outline-secondary toggle-password" title="Show password" aria-label="Show password">
                 <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" role="img" aria-hidden="true">
                     <path class="eye" d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8z"/>
@@ -60,7 +60,7 @@
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input type="submit" value="@localizer["register-button"]" class="btn btn-dark-blue w-100 p-2" />
+    <input type="submit" value="@localizer["register"]" class="btn btn-dark-blue w-100 p-2" />
     <div>
         <p class="text-center mt-2">
             @localizer["already-have-an-account"]

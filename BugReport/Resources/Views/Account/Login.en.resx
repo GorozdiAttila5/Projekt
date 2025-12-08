@@ -120,9 +120,6 @@
   <data name="dont-have-an-account" xml:space="preserve">
     <value>Don't have an account?</value>
   </data>
-  <data name="error-reporting" xml:space="preserve">
-    <value>Error-reporting</value>
-  </data>
   <data name="forgot-password" xml:space="preserve">
     <value>Forgot Password?</value>
   </data>
@@ -131,24 +128,6 @@
   </data>
   <data name="register" xml:space="preserve">
     <value>Register</value>
-  </data>
-  <data name="student" xml:space="preserve">
-    <value>Student</value>
-  </data>
-  <data name="login-name" xml:space="preserve">
-    <value>Login name</value>
-  </data>
-  <data name="login-name-placeholder" xml:space="preserve">
-    <value>Enter your login name</value>
-  </data>
-  <data name="password" xml:space="preserve">
-    <value>Password</value>
-  </data>
-  <data name="password-placeholder" xml:space="preserve">
-    <value>Enter your password</value>
-  </data>
-  <data name="remember-me" xml:space="preserve">
-    <value>Remember me</value>
   </data>
   <data name="invalid-login" xml:space="preserve">
     <value>Invalid login attempt!</value>

@@ -68,7 +68,7 @@
                                 @if (item.LatestChangeLog!.Status.Name != null)
                                 {
                                     <span class="badge @GetStatusBadgeClass(item.LatestChangeLog.Status.Name) float-end">
-                                        @item.LatestChangeLog.Status.Name
+                                        @GetLocalizedStatusName(item.LatestChangeLog.Status.Name, localizer)
                                     </span>
                                 }
                             </td>

@@ -1,186 +1,112 @@
 ﻿@using BugReport.Models.Report
 @using BugReport.Entities
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject UserManager<User> userManager
+@inject IViewLocalizer localizer
 @model ReportViewModel
 
 @{
     ViewData["Title"] = Model.Report.Title;
+    bool isReporter = Model.Report.Reporter.Id == userManager.GetUserId(User);
+    bool isAssignee = Model.Report.Assignees.Any(a => a.Id == userManager.GetUserId(User));
 }
 
-<!-- ===================== STYLES ===================== -->
+<!-- ===================== MODERN UI STYLES ===================== -->
 <style>
-    .section-card {
-        border-radius: 8px;
-        overflow: hidden;
-        background: #fff;
-    }
-
-    .section-header {
-        background: #f8f9fa;
-        padding: .75rem 1rem;
-        font-weight: 600;
-        border-bottom: 1px solid #e5e5e5;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
-    }
-
-    /* ------------------ ATTACHMENTS ------------------ */
-    .attachment-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background: #fff;
-        padding: 10px;
-        text-align: center;
-        transition: box-shadow .2s;
-        height: 100%;
-    }
-
-        .attachment-card:hover {
-            box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
-        }
-
-    .attachment-thumb {
-        height: 150px;
-        width: 100%;
-        border-radius: 6px;
-        overflow: hidden;
-        background: #f4f4f4;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-        .attachment-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-    .file-icon {
-        font-size: 42px;
-        opacity: .8;
-    }
-
-    .attachment-name {
-        font-size: .85rem;
-        margin-top: 6px;
-        color: #333;
-        word-break: break-word;
-    }
-
-    /* ------------------ MESSAGES ------------------ */
-    .msg-avatar {
-        width: 42px;
-        height: 42px;
-        background: var(--main-color);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-    }
-
-    .msg-bubble {
-        background: #fafafa;
-        border-radius: 6px;
-        border: 1px solid #e0e0e0;
-    }
-
-    /* ------------------ ACTIVITY FEED ------------------ */
-    .activity-entry {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-
-    .activity-avatar {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background: var(--main-color);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-    }
-
-    .activity-box {
-        background: #f8f9fa;
-        padding: 10px 12px;
-        border-radius: 6px;
-        border: 1px solid #e0e0e0;
-        font-size: .9rem;
-    }
+    /* ===== Global Reset ===== */
+    
 </style>
 
-
-<div class="main-card py-4">
+<div class="main-card">
 
     <!-- ===================== HEADER ===================== -->
-    <div class="d-flex justify-content-between align-items-start align-items-md-center mb-4 flex-column flex-md-row">
+    <div class="d-flex justify-content-between align-items-start flex-column flex-md-row mb-4">
         <div>
             <h3 class="fw-bold mb-1">@Model.Report.Title</h3>
-            @{
-                var status = Model.LatestChangeLog?.Status;
-            }
 
-            @if (status != null)
+            @if (Model.LatestChangeLog?.Status is Status status)
             {
-                <span class="badge @GetStatusBadgeClass(status.NormalizedName)"
-                      data-bs-toggle="tooltip"
-                      title="Current status: @status.Name">
-                    @status.Name
+                <span class="badge @GetStatusBadgeClass(status.NormalizedName)">
+                    @GetLocalizedStatusName(status.Name, localizer)
                 </span>
             }
         </div>
 
-        @if (User.IsInRole("Student") || User.IsInRole("Instructor"))
+        @if (isReporter)
         {
             <div class="d-flex gap-2 mt-3 mt-md-0">
-                <a class="btn btn-dark-blue btn-sm" asp-action="Edit" asp-route-id="@Model.Report.Id">Edit</a>
-                <button class="btn btn-outline-red btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+                <a class="btn btn-dark-blue btn-sm" asp-action="Edit" asp-route-id="@Model.Report.Id">@localizer["edit"]</a>
+                <button class="btn btn-outline-red btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">@localizer["delete"]</button>
             </div>
         }
+        @if (isAssignee || User.IsInRole("Admin"))
+        {
+            <form asp-action="ChangeStatus" method="post" class="mt-3 d-flex gap-2">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="reportId" value="@Model.Report.Id" />
+
+                <select name="statusId" class="form-select w-auto">
+                    @foreach (var status in ViewBag.Statuses)
+                    {
+                        <option value="@status.Id"
+                                selected="@(Model.LatestChangeLog?.Status?.Id == status.Id)">
+                            @GetLocalizedStatusName(status.Name, localizer)
+                        </option>
+                    }
+                </select>
+
+                <button class="btn btn-dark-blue">
+                    @localizer["update-status"]
+                </button>
+            </form>
+        }
+
+
+
     </div>
 
 
     <!-- ===================== DETAILS ===================== -->
-    <div class="section-card mb-4">
-        <div class="section-header">Details</div>
-        <div class="p-3 small text-muted">
-            <div><strong>Created by:</strong> @Model.Report.Reporter.FirstName @Model.Report.Reporter.LastName</div>
-            <div><strong>Assigned to:</strong> @string.Join(", ", Model.Report.Assignees.Select(a => $"{a.FirstName} {a.LastName}"))</div>
-            <div><strong>Created:</strong> @Model.Report.CreatedAt.ToString("g")</div>
-            <div><strong>Modified:</strong><span id="modifiedTimestamp"> @Model.LatestChangeLog?.Timestamp.ToString("g")</span></div>
+    <div class="modern-card">
+        <div class="card-header-modern">@localizer["details"]</div>
+
+        <div class="card-body-modern small text-muted">
+            <div><strong>@localizer["created-by"]:</strong> @Model.Report.Reporter.FirstName @Model.Report.Reporter.LastName</div>
+            <div><strong>@localizer["assigned-to"]:</strong> @string.Join(", ", Model.Report.Assignees.Select(a => $"{a.FirstName} {a.LastName}"))</div>
+            <div><strong>@localizer["created"]:</strong> @Model.Report.CreatedAt.ToString("g")</div>
+            <div><strong>@localizer["modified"]:</strong> <span id="modifiedTimestamp">@Model.LatestChangeLog?.Timestamp.ToString("g")</span></div>
         </div>
     </div>
 
 
     <!-- ===================== DESCRIPTION ===================== -->
-    <div class="section-card mb-4">
-        <div class="section-header">Description</div>
-        <div class="p-3 text-muted">
+    <div class="modern-card">
+        <div class="card-header-modern">@localizer["description"]</div>
+
+        <div class="card-body-modern text-muted">
             @Html.Raw(Model.Report.Description.Replace("\n", "<br/>"))
         </div>
     </div>
 
 
     <!-- ===================== ATTACHMENTS ===================== -->
-    <div class="section-card mb-4">
-        <div class="section-header d-flex justify-content-between">
-            <span>Attachments</span>
+    <div class="modern-card">
+        <div class="card-header-modern d-flex justify-content-between">
+            <span>@localizer["attachments"]</span>
             <span class="badge bg-secondary">@Model.Report.Attachments?.Count()</span>
         </div>
 
-        <div class="p-3">
+        <div class="card-body-modern">
             @if (Model.Report.Attachments?.Any() ?? false)
             {
                 <div class="row g-3">
                     @foreach (var att in Model.Report.Attachments)
                     {
-                        var rel = $"/uploads/reports/{Model.Report.Id}/{att.FileName}";
                         var ext = System.IO.Path.GetExtension(att.FileName).ToLower();
                         var isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext);
+                        var rel = $"/uploads/reports/{Model.Report.Id}/{att.FileName}";
 
                         <div class="col-6 col-md-3">
                             <div class="attachment-card">
@@ -202,7 +128,7 @@
                                 <div class="attachment-name">@att.FileName</div>
 
                                 <a href="@rel" download class="btn btn-outline-primary btn-sm w-100 mt-2">
-                                    Download
+                                    @localizer["download"]
                                 </a>
                             </div>
                         </div>
@@ -211,43 +137,44 @@
             }
             else
             {
-                <p class="text-muted">No attachments added.</p>
+                <p class="text-muted">@localizer["no-attachments"]</p>
             }
         </div>
     </div>
 
 
     <!-- ===================== MESSAGES ===================== -->
-    <div class="section-card mb-4">
-        <div class="section-header d-flex justify-content-between">
-            <span>Messages</span>
-            <span id="messagesBadge" class="badge bg-secondary">@Model.Report.Messages?.Count()</span>
+    <div class="modern-card">
+        <div class="card-header-modern d-flex justify-content-between">
+            <span>@localizer["messages"]</span>
+            <span id="messagesBadge" class="badge bg-secondary">
+                @Model.Report.Messages?.Count()
+            </span>
         </div>
 
-        <div class="p-3">
+        <div class="card-body-modern">
+
             <div id="messageList">
                 @if (Model.Report.Messages?.Any() ?? false)
                 {
                     @foreach (var msg in Model.Report.Messages)
                     {
-                        <div class="d-flex mb-3 message-item">
-                            <div class="msg-avatar me-3">
-                                @(msg.User.FirstName[0])@(msg.User.LastName[0])
-                            </div>
+                        <div class="msg-item message-item">
+                            <div class="msg-avatar">@msg.User.FirstName[0]@msg.User.LastName[0]</div>
 
-                            <div class="msg-bubble p-3 flex-grow-1">
+                            <div class="msg-bubble">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
                                     <strong>@msg.User.FirstName @msg.User.LastName</strong>
                                     <span>@msg.TimeStamp.ToString("g")</span>
                                 </div>
-                                <div>@msg.Text</div>
+                                @msg.Text
                             </div>
                         </div>
                     }
                 }
                 else
                 {
-                    <p id="noMessagesText" class="text-muted">No messages added.</p>
+                    <p id="noMessagesText" class="text-muted">@localizer["no-messages"]</p>
                 }
             </div>
 
@@ -256,14 +183,17 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="ReportId" value="@Model.Report.Id" />
 
-                <textarea name="Text" class="form-control mb-2" rows="2" placeholder="Add a message..." style="resize:none;"></textarea>
+                <textarea name="Text" class="form-control mb-2" rows="2" placeholder="@localizer["add-a-message"]" style="resize:none;"></textarea>
 
-                <button class="btn btn-dark-blue">Post message</button>
+                <button class="btn btn-dark-blue">@localizer["post-message"]</button>
             </form>
+
         </div>
     </div>
 
-    <button class="btn btn-outline-dark-blue w-100" data-bs-toggle="modal" data-bs-target="#activityModal">View activity</button>
+    <button class="btn btn-outline-dark-blue w-100" data-bs-toggle="modal" data-bs-target="#activityModal">
+        @localizer["view-activity"]
+    </button>
 </div>
 
 
@@ -271,42 +201,45 @@
 <div class="modal fade" id="deleteModal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="fw-bold">Confirm delete</h5>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
+
+            <div class="modal-header">
+                <h5 class="fw-bold">@localizer["confirm-delete"]</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-                <p>This action cannot be undone.</p>
+                <p>@localizer["delete-text"]</p>
+
                 <div class="d-flex justify-content-end gap-2">
-                    <button class="btn btn-outline-dark-blue" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-outline-dark-blue" data-bs-dismiss="modal">@localizer["cancel"]</button>
 
                     <form asp-action="Delete" asp-route-id="@Model.Report.Id" method="post">
                         @Html.AntiForgeryToken()
-                        <button class="btn btn-outline-red">Delete</button>
+                        <button class="btn btn-outline-red">@localizer["delete"]</button>
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 
-<!-- ===================== IMAGE MODAL ===================== -->
+<!-- ===================== IMAGE GALLERY MODAL ===================== -->
 <div class="modal fade" id="imageGalleryModal">
     <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content bg-dark text-white">
+        <div class="modal-content">
 
             <button class="btn-close btn-close-white ms-auto m-2" data-bs-dismiss="modal"></button>
 
-            <div class="modal-body text-center position-relative">
+            <div class="modal-body text-center">
 
                 <button id="galleryPrev"
                         class="btn btn-light position-absolute top-50 start-0 translate-middle-y">
                     ❮
                 </button>
 
-                <img id="galleryImage" class="img-fluid rounded" />
+                <img id="galleryImage" class="img-fluid" />
 
                 <div id="galleryCaption" class="mt-2 small"></div>
 
@@ -326,20 +259,20 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
 
-            <div class="modal-header bg-light">
-                <h5 class="fw-bold">Activity</h5>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="fw-bold">@localizer["activity"]</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
 
                 @{
-                    var timeline = Model.ChangeLogs.Select(log => new
+                    var timeline = Model.ChangeLogs
+                    .Select(log => new
                     {
                         Time = log.Timestamp,
                         User = log.User,
-                        Text = log.ChangeDescription,
-                        Type = "log"
+                        Text = log.ChangeDescription
                     })
                     .OrderBy(t => t.Time)
                     .ToList();
@@ -347,7 +280,7 @@
 
                 @if (!timeline.Any())
                 {
-                    <p class="text-muted text-center">No activity yet.</p>
+                    <p class="text-muted text-center">@localizer["no-activity"]</p>
                 }
                 else
                 {
@@ -355,9 +288,7 @@
                         @foreach (var t in timeline)
                         {
                             <div class="activity-entry">
-                                <div class="activity-avatar">
-                                    @(t.User.FirstName[0])@(t.User.LastName[0])
-                                </div>
+                                <div class="activity-avatar">@t.User.FirstName[0]@t.User.LastName[0]</div>
 
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between small mb-1">
@@ -365,19 +296,20 @@
                                         <span class="text-muted">@t.Time.ToString("g")</span>
                                     </div>
 
-                                    <div class="activity-box">
-                                        @t.Text
-                                    </div>
+                                    <div class="activity-box">@t.Text</div>
                                 </div>
                             </div>
                         }
-                    </div>   
+                    </div>
                 }
+
             </div>
         </div>
     </div>
 </div>
 
+
+<!-- ===================== HELPERS ===================== -->
 @functions {
     public string GetStatusBadgeClass(string normalizedStatus) => normalizedStatus?.ToUpper() switch
     {
@@ -386,29 +318,34 @@
         "BLOCKED" => "bg-warning",
         _ => "bg-dark"
     };
-}
 
-<!-- ===================== FILE ICON HELPER ===================== -->
-@functions {
+    public string GetLocalizedStatusName(string status, IViewLocalizer localizer)
+    {
+        return status switch
+        {
+            "Incoming" => localizer["status-incoming"].Value,
+            "In progress" => localizer["status-in-progress"].Value,
+            "Resolved" => localizer["status-resolved"].Value,
+            "Rejected" => localizer["status-rejected"].Value,
+            "Blocked" => localizer["status-blocked"].Value,
+            _ => status
+        };
+    }
+
     public string GetFileIcon(string ext) => ext switch
     {
         ".pdf" => "📕",
-        ".doc" => "📘",
-        ".docx" => "📘",
-        ".xls" => "📗",
-        ".xlsx" => "📗",
-        ".csv" => "📗",
-        ".ppt" => "📙",
-        ".pptx" => "📙",
+        ".doc" or ".docx" => "📘",
+        ".xls" or ".xlsx" or ".csv" => "📗",
+        ".ppt" or ".pptx" => "📙",
         ".txt" => "📄",
-        ".zip" => "🗂️",
-        ".rar" => "🗂️",
-        ".7z" => "🗂️",
+        ".zip" or ".rar" or ".7z" => "🗂️",
         _ => "📁"
     };
 }
 
 
+<!-- ===================== SCRIPTS ===================== -->
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -422,7 +359,6 @@
                 const cap = document.getElementById("galleryCaption");
                 const prev = document.getElementById("galleryPrev");
                 const next = document.getElementById("galleryNext");
-
                 let index = 0;
 
                 const show = () => {
@@ -430,11 +366,11 @@
                     cap.textContent = imgs[index].dataset.caption;
                 };
 
-                imgs.forEach((el, i) =>
-                    el.addEventListener("click", () => {
-                        index = i; show(); modal.show();
-                    })
-                );
+                imgs.forEach((el, i) => el.addEventListener("click", () => {
+                    index = i;
+                    show();
+                    modal.show();
+                }));
 
                 prev.onclick = () => { index = (index - 1 + imgs.length) % imgs.length; show(); };
                 next.onclick = () => { index = (index + 1) % imgs.length; show(); };
@@ -448,7 +384,6 @@
             if (form) {
                 form.addEventListener("submit", async e => {
                     e.preventDefault();
-
                     const data = new FormData(form);
 
                     const res = await fetch(form.action, {
@@ -464,55 +399,77 @@
 
                     const json = await res.json();
 
-                    /* ------------------ 1. ADD MESSAGE TO MESSAGE LIST ------------------ */
                     list.insertAdjacentHTML("beforeend", `
-                        <div class="d-flex mb-3 message-item">
-                            <div class="msg-avatar me-3">${json.initials}</div>
-                            <div class="msg-bubble p-3 flex-grow-1">
+                        <div class="msg-item message-item">
+                            <div class="msg-avatar">${json.initials}</div>
+                            <div class="msg-bubble">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
                                     <strong>${json.user}</strong>
                                     <span>${json.timestamp}</span>
                                 </div>
-                                <div>${json.text}</div>
+                                ${json.text}
                             </div>
                         </div>
                     `);
 
-                    /* ------------------ 2. UPDATE MODIFIED TIMESTAMP ------------------ */
                     const modified = document.getElementById("modifiedTimestamp");
-                    if (modified) {
-                        modified.textContent = json.timestamp;
-                    }
+                    if (modified) modified.textContent = json.timestamp;
 
-                    /* ------------------ 3. INSERT INTO ACTIVITY FEED ------------------ */
                     const activity = document.getElementById("activityFeed");
-
                     if (activity) {
                         activity.insertAdjacentHTML("beforeend", `
                             <div class="activity-entry">
-                                <div class="activity-avatar">
-                                    ${json.initials}
-                                </div>
+                                <div class="activity-avatar">${json.initials}</div>
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between small mb-1">
                                         <strong>${json.user}</strong>
                                         <span class="text-muted">${json.timestamp}</span>
                                     </div>
-                                    <div class="activity-box">
-                                        ${json.changeDescription}
-                                    </div>
+                                    <div class="activity-box">${json.changeDescription}</div>
                                 </div>
                             </div>
                         `);
                     }
 
-                    /* ------------------ 4. CLEANUP ------------------ */
                     form.reset();
                     badge.textContent = document.querySelectorAll(".message-item").length;
 
                     const emptyText = document.getElementById("noMessagesText");
                     if (emptyText) emptyText.remove();
                 });
+            }
+        });
+
+                document.getElementById("statusForm")?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const data = new FormData(form);
+
+            const res = await fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            const json = await res.json();
+
+            if (json.success) {
+                document.getElementById("modifiedTimestamp").textContent = json.timestamp;
+
+                const activity = document.getElementById("activityFeed");
+                activity.insertAdjacentHTML("beforeend", `
+                    <div class="activity-entry">
+                        <div class="activity-avatar">${json.changeDescription[0]}</div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <strong>Status Update</strong>
+                                <span class="text-muted">${json.timestamp}</span>
+                            </div>
+                            <div class="activity-box">${json.changeDescription}</div>
+                        </div>
+                    </div>
+                `);
             }
         });
     </script>

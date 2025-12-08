@@ -4,104 +4,83 @@
 @model EditReportViewModel
 @{
     ViewData["Title"] = localizer["edit-report"];
-    var isReporter = ViewBag.IsReporter;
 }
 
 <div class="main-card">
     <h2 class="title-text text-center">@localizer["edit-report"]</h2>
+
     <form asp-controller="Report" asp-action="Edit" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="RowVersion" />
 
-        @if (isReporter)
-        {
-            <!-- Title -->
-            <div class="mb-3">
-                <label asp-for="Title" class="form-label fw-bold">@localizer["title"]</label>
-                <input asp-for="Title" class="form-control" placeholder="@localizer["title-placeholder"]" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
+        <!-- Title -->
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label fw-bold">@localizer["title"]</label>
+            <input asp-for="Title" class="form-control" placeholder="@localizer["title-placeholder"]" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
 
-            <!-- Assignees -->
-            <div class="mb-3">
-                <label asp-for="Assignees" class="form-label fw-bold">@localizer["assignees"]</label>
-                <div class="assignee-selector">
-                    <div id="assignee-tag-container" class="form-control d-flex flex-wrap align-items-center gap-2 position-relative" style="min-height: 42px; cursor: text" data-placeholder="@localizer["add-assignees-placeholder"]">
-                        <input id="assignee-input" class="border-0 flex-grow-2" type="text" placeholder="@localizer["add-assignees-placeholder"]" autocomplete="off" />
-                    </div>
-                    <div id="assignee-dropdown" class="dropdown-menu w-100 mt-1"></div>
-                    <div id="assignee-hidden">
-                        @foreach (var a in Model.Assignees ?? new List<string>())
-                        {
-                            <input type="hidden" name="Assignees[]" value="@a" data-id="@a" />
-                        }
-                    </div>
+        <!-- Assignees -->
+        <div class="mb-3">
+            <label asp-for="Assignees" class="form-label fw-bold">@localizer["assignees"]</label>
+            <div class="assignee-selector">
+                <div id="assignee-tag-container" class="form-control d-flex flex-wrap align-items-center gap-2 position-relative" style="min-height: 42px; cursor: text" data-placeholder="@localizer["add-assignees-placeholder"]">
+                    <input id="assignee-input" class="border-0 flex-grow-2" type="text" placeholder="@localizer["add-assignees-placeholder"]" autocomplete="off" />
                 </div>
-                <span asp-validation-for="Assignees" class="text-danger"></span>
-            </div>
-
-            <!-- Description -->
-            <div class="mb-3">
-                <label asp-for="Description" class="form-label fw-bold">@localizer["description"]</label>
-                <textarea asp-for="Description" class="form-control" rows="7" style="resize:none" placeholder="@localizer["description-placeholder"]"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <!-- Existing Attachments -->
-            <div class="mb-3">
-                <label class="form-label fw-bold">@localizer["existing-attachments"]</label>
-                <div id="existing-attachments" class="d-flex flex-wrap gap-2">
-                    @if (Model.Attachments is not null && Model.Attachments.Any())
+                <div id="assignee-dropdown" class="dropdown-menu w-100 mt-1"></div>
+                <div id="assignee-hidden">
+                    @foreach (var a in Model.Assignees ?? new List<string>())
                     {
-                        @foreach (var attachment in Model.Attachments)
-                        {
-                            <div class="file-card" data-id="@attachment.Id">
-                                <div class="file-thumb icon-thumb">📄</div>
-                                <div class="file-name">@attachment.FileName</div>
-                                <input type="hidden" name="ExistingAttachments[]" value="@attachment.Id" />
-                                <button type="button" class="file-remove btn btn-sm btn-outline-danger">&times;</button>
-                            </div>
-                        }
+                        <input type="hidden" name="Assignees[]" value="@a" data-id="@a" />
                     }
-                    else
-                    {
-                        <p class="text-muted">@localizer["no-attachments"]</p>
-                    }
-                    
                 </div>
             </div>
+            <span asp-validation-for="Assignees" class="text-danger"></span>
+        </div>
 
-            <!-- New Attachments -->
-            <div class="mb-3">
-                <label asp-for="NewAttachments" class="form-label fw-bold">@localizer["new-attachments"]</label>
-                <div id="file-dropzone" class="drop-zone border rounded bg-white p-4 text-center">
-                    <p class="text-muted">@localizer["drag-and-drop"]</p>
-                    <input asp-for="NewAttachments" type="file" id="file-input" class="d-none" multiple />
-                </div>
-                <div id="file-preview" class="mt-3 d-flex flex-wrap gap-3"></div>
-                <span asp-validation-for="NewAttachments" class="text-danger"></span>
-            </div>
-        }
-        else
-        {
-            <!-- Status -->
-            <div class="mb-3">
-                <label asp-for="StatusId" class="form-label fw-bold">@localizer["status"]</label>
-                <select asp-for="StatusId" class="form-select">
-                    @foreach (var status in ViewBag.Statuses)
+        <!-- Description -->
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label fw-bold">@localizer["description"]</label>
+            <textarea asp-for="Description" class="form-control" rows="7" style="resize:none" placeholder="@localizer["description-placeholder"]"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <!-- Existing Attachments -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">@localizer["existing-attachments"]</label>
+            <div id="existing-attachments" class="d-flex flex-wrap gap-2">
+                @if (Model.Attachments is not null && Model.Attachments.Any())
+                {
+                    @foreach (var attachment in Model.Attachments)
                     {
-                        @if (Model.StatusId == status.Id)
-                        {
-                            <option value="@status.Id" selected>@status.Name</option>
-                        }
-                        else
-                        {
-                            <option value="@status.Id">@status.Name</option>
-                        }
+                        <div class="file-card" data-id="@attachment.Id">
+                            <div class="file-thumb icon-thumb">📄</div>
+                            <div class="file-name">@attachment.FileName</div>
+                            <input type="hidden" name="ExistingAttachments[]" value="@attachment.Id" />
+                            <button type="button" class="file-remove btn btn-sm btn-outline-danger">&times;</button>
+                        </div>
                     }
-                </select>
+                }
+                else
+                {
+                    <p class="text-muted">@localizer["no-attachments"]</p>
+                }
+
             </div>
-        }
+        </div>
+
+        <!-- New Attachments -->
+        <div class="mb-3">
+            <label asp-for="NewAttachments" class="form-label fw-bold">@localizer["attachments"]</label>
+            <div id="file-dropzone" class="drop-zone border rounded bg-white p-4 text-center">
+                <p class="text-muted">@localizer["drag-and-drop"]</p>
+                <input asp-for="NewAttachments" type="file" id="file-input" class="d-none" multiple />
+            </div>
+            <div id="file-preview" class="mt-3 d-flex flex-wrap gap-3"></div>
+            <span asp-validation-for="NewAttachments" class="text-danger"></span>
+        </div>
+        
         <input type="submit" value="@localizer["save"]" class="btn btn-dark-blue w-100 p-2"/>
         <a asp-controller="Report" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-dark-blue w-100 p-2 mt-3">@localizer["cancel"]</a>
     </form>
@@ -144,14 +123,14 @@
                     const users = await res.json();
                     this.users = users.map(u => ({ id: u.id ?? u.Id, fullName: u.fullName ?? u.FullName ?? "" }));
                     this.renderDropdown();
-                } catch(e) { console.error(e); }
+                } catch (e) { console.error(e); }
             }
 
             restoreExisting() {
                 const existing = Array.from(this.hidden.querySelectorAll("input")).map(i => i.value);
                 existing.forEach(id => {
                     const user = this.users.find(u => u.id == id);
-                    if(user) this.addAssignee(user, false);
+                    if (user) this.addAssignee(user, false);
                 });
             }
 
@@ -159,7 +138,7 @@
                 const query = this.input.value.trim().toLowerCase();
                 this.dropdown.innerHTML = "";
                 this.filtered = this.users.filter(u => !this.selected.has(u.id) && u.fullName.toLowerCase().includes(query));
-                if(!this.filtered.length) return this.hideDropdown();
+                if (!this.filtered.length) return this.hideDropdown();
 
                 this.filtered.forEach((user, i) => {
                     const item = document.createElement("div");
@@ -174,46 +153,46 @@
                 this.dropdown.classList.add("show");
             }
 
-            hideDropdown(){ this.dropdown.classList.remove("show"); }
+            hideDropdown() { this.dropdown.classList.remove("show"); }
 
-            handleKeyDown(e){
-                if(!this.dropdown.classList.contains("show")) return;
-                const len = this.filtered.length; if(!len) return;
+            handleKeyDown(e) {
+                if (!this.dropdown.classList.contains("show")) return;
+                const len = this.filtered.length; if (!len) return;
 
-                switch(e.key){
-                    case "ArrowDown": e.preventDefault(); this.highlightIndex=(this.highlightIndex+1)%len; this.applyHighlight(); break;
-                    case "ArrowUp": e.preventDefault(); this.highlightIndex=(this.highlightIndex-1+len)%len; this.applyHighlight(); break;
-                    case "Enter": e.preventDefault(); const choice=this.filtered[this.highlightIndex]; if(choice){this.addAssignee(choice); this.hideDropdown();} break;
+                switch (e.key) {
+                    case "ArrowDown": e.preventDefault(); this.highlightIndex = (this.highlightIndex + 1) % len; this.applyHighlight(); break;
+                    case "ArrowUp": e.preventDefault(); this.highlightIndex = (this.highlightIndex - 1 + len) % len; this.applyHighlight(); break;
+                    case "Enter": e.preventDefault(); const choice = this.filtered[this.highlightIndex]; if (choice) { this.addAssignee(choice); this.hideDropdown(); } break;
                     case "Backspace":
-                        if(this.input.value===""){
-                            const lastId=[...this.selected.keys()].pop();
-                            if(lastId){ const tag=this.container.querySelector(`[data-id='${lastId}']`); if(tag) this.removeAssignee(lastId, tag); }
+                        if (this.input.value === "") {
+                            const lastId = [...this.selected.keys()].pop();
+                            if (lastId) { const tag = this.container.querySelector(`[data-id='${lastId}']`); if (tag) this.removeAssignee(lastId, tag); }
                         }
                         break;
                 }
             }
 
-            applyHighlight(){ [...this.dropdown.children].forEach((item,i)=>item.classList.toggle("active",i===this.highlightIndex)); }
+            applyHighlight() { [...this.dropdown.children].forEach((item, i) => item.classList.toggle("active", i === this.highlightIndex)); }
 
-            addAssignee(user, addHidden=true){
-                if(!user?.id || this.selected.has(user.id)) return;
+            addAssignee(user, addHidden = true) {
+                if (!user?.id || this.selected.has(user.id)) return;
                 this.selected.set(user.id, user.fullName);
                 const tag = document.createElement("span");
-                tag.className="tag"; tag.dataset.id=user.id;
-                tag.innerHTML=`${user.fullName} <span class="remove-tag">&times;</span>`;
-                tag.querySelector(".remove-tag").addEventListener("click",()=>this.removeAssignee(user.id, tag));
+                tag.className = "tag"; tag.dataset.id = user.id;
+                tag.innerHTML = `${user.fullName} <span class="remove-tag">&times;</span>`;
+                tag.querySelector(".remove-tag").addEventListener("click", () => this.removeAssignee(user.id, tag));
                 this.container.insertBefore(tag, this.input);
 
-                if(addHidden){
+                if (addHidden) {
                     const hiddenInput = document.createElement("input");
-                    hiddenInput.type="hidden"; hiddenInput.name="Assignees[]"; hiddenInput.value=user.id; hiddenInput.dataset.id=user.id;
+                    hiddenInput.type = "hidden"; hiddenInput.name = "Assignees[]"; hiddenInput.value = user.id; hiddenInput.dataset.id = user.id;
                     this.hidden.appendChild(hiddenInput);
                 }
 
-                this.input.value=""; this.updatePlaceholder(); this.renderDropdown();
+                this.input.value = ""; this.updatePlaceholder(); this.renderDropdown();
             }
 
-            removeAssignee(id, tagEl){
+            removeAssignee(id, tagEl) {
                 this.selected.delete(id);
                 tagEl?.remove();
                 const hidden = this.hidden.querySelector(`input[data-id='${id}']`);
@@ -221,63 +200,118 @@
                 this.updatePlaceholder(); this.renderDropdown();
             }
 
-            updatePlaceholder(){ this.input.placeholder = this.selected.size===0?"@localizer["add-assignees-placeholder"]":""; }
+            updatePlaceholder() { this.input.placeholder = this.selected.size === 0 ? "@localizer["add - assignees - placeholder"]": ""; }
         }
 
         // ----- Attachment Manager -----
         class AttachmentManager {
-            constructor(){
-                this.dropzone=document.getElementById("file-dropzone");
-                this.input=document.getElementById("file-input");
-                this.preview=document.getElementById("file-preview");
-                this.files=[];
-                if(this.dropzone && this.input) this.init();
+            constructor() {
+                this.dropzone = document.getElementById("file-dropzone");
+                this.input = document.getElementById("file-input");
+                this.preview = document.getElementById("file-preview");
+                this.files = [];
+
+                if (this.dropzone && this.input) this.init();
             }
 
-            init(){
-                this.dropzone.onclick=()=>this.input.click();
-                this.input.onchange=e=>this.addFiles([...e.target.files]);
-                this.dropzone.ondragover=e=>{ e.preventDefault(); this.dropzone.classList.add("dragover"); };
-                this.dropzone.ondragleave=()=>this.dropzone.classList.remove("dragover");
-                this.dropzone.ondrop=e=>{ e.preventDefault(); this.dropzone.classList.remove("dragover"); this.addFiles([...e.dataTransfer.files]); };
+            init() {
+                this.dropzone.onclick = () => this.input.click();
+                this.input.onchange = e => this.addFiles([...e.target.files]);
+
+                this.dropzone.ondragover = e => {
+                    e.preventDefault();
+                    this.dropzone.classList.add("dragover");
+                };
+
+                this.dropzone.ondragleave = () => this.dropzone.classList.remove("dragover");
+
+                this.dropzone.ondrop = e => {
+                    e.preventDefault();
+                    this.dropzone.classList.remove("dragover");
+                    this.addFiles([...e.dataTransfer.files]);
+                };
             }
 
-            addFiles(newFiles){
-                newFiles.forEach(file=>{
-                    if(this.files.some(f=>f.name===file.name && f.size===file.size)) return;
-                    this.files.push(file); this.createPreview(file);
+            addFiles(newFiles) {
+                newFiles.forEach(file => {
+                    if (this.files.some(f => f.name === file.name && f.size === file.size)) return;
+
+                    this.files.push(file);
+                    this.createPreview(file);
                 });
+
                 this.syncInput();
             }
 
-            getFileIcon(file){ const ext=file.name.split(".").pop().toLowerCase(); const icons={pdf:"📕",doc:"📘",docx:"📘",xls:"📗",xlsx:"📗",csv:"📗",ppt:"📙",pptx:"📙",txt:"📄",zip:"🗂️",rar:"🗂️","7z":"🗂️"}; return icons[ext]??"📁"; }
+            getFileIcon(file) {
+                const ext = file.name.split(".").pop().toLowerCase();
 
-            createPreview(file){
-                const wrapper=document.createElement("div"); wrapper.className="file-card";
-                wrapper.innerHTML=`<div class="file-thumb icon-thumb">${this.getFileIcon(file)}</div><div class="file-name">${file.name}</div><button class="file-remove btn btn-sm btn-outline-danger">&times;</button>`;
+                const icons = {
+                    pdf: "📕",
+                    doc: "📘",
+                    docx: "📘",
+                    xls: "📗",
+                    xlsx: "📗",
+                    csv: "📗",
+                    ppt: "📙",
+                    pptx: "📙",
+                    txt: "📄",
+                    zip: "🗂️",
+                    rar: "🗂️",
+                    "7z": "🗂️"
+                };
+
+                return icons[ext] ?? "📁";
+            }
+
+            createPreview(file) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "file-card";
+
+                wrapper.innerHTML = `
+                            <div class="file-thumb icon-thumb">${this.getFileIcon(file)}</div>
+                            <div class="file-name">${file.name}</div>
+                            <button class="file-remove">&times;</button>
+                        `;
+
+                // Append early so DOM is ready
                 this.preview.appendChild(wrapper);
 
-                if(file.type.startsWith("image/")){ const reader=new FileReader(); reader.onload=e=>{ const thumb=wrapper.querySelector(".file-thumb"); thumb.classList.add("image-thumb"); thumb.innerHTML=`<img src="${e.target.result}" />`; }; reader.readAsDataURL(file); }
+                // IF IMAGE → load actual preview
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const thumb = wrapper.querySelector(".file-thumb");
+                        thumb.classList.add("image-thumb");
+                        thumb.innerHTML = `<img src="${e.target.result}" />`;
+                    };
+                    reader.readAsDataURL(file);
+                }
 
-                wrapper.querySelector(".file-remove").onclick=()=>{
-                    this.files=this.files.filter(f=>f!==file);
+                // Delete handler
+                wrapper.querySelector(".file-remove").onclick = () => {
+                    this.files = this.files.filter(f => f !== file);
                     wrapper.remove();
                     this.syncInput();
                 };
             }
 
-            syncInput(){ const dt=new DataTransfer(); this.files.forEach(f=>dt.items.add(f)); this.input.files=dt.files; }
+            syncInput() {
+                const dt = new DataTransfer();
+                this.files.forEach(f => dt.items.add(f));
+                this.input.files = dt.files;
+            }
         }
 
-        document.addEventListener("DOMContentLoaded",()=>{
+        document.addEventListener("DOMContentLoaded", () => {
             new AssigneeSelector();
             new AttachmentManager();
 
             // Remove existing attachments
-            document.querySelectorAll("#existing-attachments .file-remove").forEach(btn=>{
-                btn.addEventListener("click",()=>{
+            document.querySelectorAll("#existing-attachments .file-remove").forEach(btn => {
+                btn.addEventListener("click", () => {
                     const card = btn.closest(".file-card");
-                    if(!card) return;
+                    if (!card) return;
                     const hidden = card.querySelector("input[type='hidden']");
                     hidden?.remove();
                     card.remove();

@@ -1,4 +1,6 @@
-﻿namespace BugReport.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BugReport.Entities
 {
     public class Report
     {
@@ -16,5 +18,8 @@
         public ICollection<ChangeLog>? ChangeLogs { get; set; }
         public ICollection<Attachment>? Attachments { get; set; }
         public ICollection<Message>? Messages { get; set; }
+
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
 }

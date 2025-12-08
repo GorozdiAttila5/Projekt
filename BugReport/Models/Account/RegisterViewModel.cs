@@ -5,34 +5,34 @@ namespace BugReport.Models.Account
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "{0} is required")]
+        [Required(ErrorMessage = "email-required")]
         [EmailAddress]
-        [Display(Name = "Email address", Prompt = "Email address")]
+        [Display(Name = "email", Prompt = "email")]
         public required string Email { get; set; }
 
-        [Required(ErrorMessage = "{0} is required")]
-        [RegularExpression(@"^[A-Z0-9]{6}$", ErrorMessage = "{0} must be 6 characters")]
-        [Display(Name = "Login name", Prompt = "Login name")]
+        [Required(ErrorMessage = "login-name-required")]
+        [RegularExpression(@"^[A-Z0-9]{6}$", ErrorMessage = "login-name-regex")]
+        [Display(Name = "login-name", Prompt = "login-name")]
         public required string UserName { get; set; }
 
-        [Required(ErrorMessage = "{0} is required")]
-        [Display(Name = "First name", Prompt = "First name")]
+        [Required(ErrorMessage = "first-name-required")]
+        [Display(Name = "first-name", Prompt = "first-name")]
         public required string FirstName { get; set; }
 
-        [Required(ErrorMessage = "{0} is required")]
-        [Display(Name = "Last name", Prompt = "Last name")]
+        [Required(ErrorMessage = "last-name-required")]
+        [Display(Name = "last-name", Prompt = "last-name")]
         public required string LastName { get; set; }
 
-        [Required(ErrorMessage = "{0} is required")]
-        [MinLength(8, ErrorMessage = "{0} must be at least {1} characters")]
+        [Required(ErrorMessage = "password")]
+        [MinLength(8, ErrorMessage = "password-regex")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password", Prompt = "Password")]
-        public required string Password { get; set; }
+        [Display(Name = "password", Prompt = "password")]
+        public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "{0} is required")]
+        [Required(ErrorMessage = "confirm-password-required")]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password", Prompt = "Confirm password")]
-        [Compare("Password", ErrorMessage = "Password does not match")]
-        public required string ConfirmPassword { get; set; }
+        [Display(Name = "confirm-password", Prompt = "confirm-password")]
+        [Compare(nameof(Password), ErrorMessage = "password-not-match")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

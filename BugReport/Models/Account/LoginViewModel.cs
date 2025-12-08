@@ -1,21 +1,20 @@
-﻿using Microsoft.Extensions.Localization;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BugReport.Models.Account
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "{0} is required")]
-        [RegularExpression(@"^[A-Z0-9]{6}$", ErrorMessage = "{0} must be 6 characters")]
-        [Display(Name = "Login name", Prompt = "Login name")]
+        [Required(ErrorMessage = "login-name-required")]
+        [RegularExpression(@"^[A-Z0-9]{6}$", ErrorMessage = "login-name-regex")]
+        [Display(Name = "login-name", Prompt = "login-name")]
         public required string UserName { get; set; }
 
-        [Required(ErrorMessage = "{0} is required")]
+        [Required(ErrorMessage = "password-required")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password", Prompt = "Password")]
+        [Display(Name = "password", Prompt = "password")]
         public required string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "remember-me")]
         public bool RememberMe { get; set; }
     }
 }

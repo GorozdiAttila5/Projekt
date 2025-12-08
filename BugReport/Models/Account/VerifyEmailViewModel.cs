@@ -4,9 +4,9 @@ namespace BugReport.Models.Account
 {
     public class VerifyEmailViewModel
     {
-        [Required(ErrorMessage = "{0} is required")]
+        [Required(ErrorMessage = "email-required")]
         [EmailAddress]
-        [Display(Name = "Email address", Prompt = "Email address")]
+        [Display(Name = "email", Prompt = "email")]
         public required string Email { get; set; }
     }
 }

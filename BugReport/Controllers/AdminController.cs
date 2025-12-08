@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace BugReport.Controllers
 {
@@ -12,15 +13,18 @@ namespace BugReport.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IStringLocalizer<AdminController> _localizer;
 
         public AdminController
         (
             UserManager<User> userManager,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            IStringLocalizer<AdminController> localizer
         )
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -69,9 +73,12 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BulkChangeRolesAjax(string[] userIds, string newRole)
         {
+            string temp = string.Empty;
+
             if (userIds == null || userIds.Length == 0 || string.IsNullOrEmpty(newRole))
             {
-                TempData["ErrorToast"] = "Invalid input.";
+                temp = _localizer["invalid-attempt"];
+                TempData["ErrorToast"] = temp;
                 return Json(new { success = false, reload = true });
             }
 
@@ -84,7 +91,8 @@ namespace BugReport.Controllers
                 var user = await _userManager.FindByIdAsync(uid);
                 if (user == null)
                 {
-                    results.Add($"User {uid} not found.");
+                    temp = _localizer["user-not-found"];
+                    results.Add(temp + '(' + uid + ')');
                     continue;
                 }
 
@@ -93,14 +101,16 @@ namespace BugReport.Controllers
                 var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 if (!removeResult.Succeeded)
                 {
-                    results.Add($"Failed to remove roles for {user.UserName}.");
+                    temp = _localizer["failed-to-remove"];
+                    results.Add(temp + '(' + user.UserName + ')');
                     continue;
                 }
 
                 var addResult = await _userManager.AddToRoleAsync(user, newRole);
                 if (!addResult.Succeeded)
                 {
-                    results.Add($"Failed to add role to {user.UserName}.");
+                    temp = _localizer["failed-to-add"];
+                    results.Add(temp + '(' + user.UserName + ')');
                     continue;
                 }
 
@@ -110,14 +120,14 @@ namespace BugReport.Controllers
 
             if (results.Any())
             {
-                TempData["WarnToast"] =
-                    $"Completed with errors.\nSuccess: {successCount}\n" +
-                    string.Join("\n", results);
+                temp = _localizer["complited-with-errors"];
+                TempData["WarnToast"] = temp + '\n' + string.Join("\n", results);
 
                 return Json(new { success = false, reload = true });
             }
 
-            TempData["SuccessToast"] = $"Role '{newRole}' assigned to {successCount} user(s).";
+            temp = _localizer["successfully-assigned"];
+            TempData["SuccessToast"] = newRole + temp;
 
             return Json(new { success = true, reload = true });
         }
@@ -135,6 +145,5 @@ namespace BugReport.Controllers
             TempData["ErrorToast"] = n;
             return Ok();
         }
-
     }
 }
