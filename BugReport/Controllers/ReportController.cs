@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Data;
@@ -43,18 +44,12 @@ namespace BugReport.Controllers
                 .AsNoTracking()
                 .AsQueryable();
 
-            // ---------------------------
-            // SEARCH FILTER
-            // ---------------------------
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim().ToLower();
                 query = query.Where(r => r.Title.ToLower().Contains(search));
             }
 
-            // ---------------------------
-            // ORDER BY LAST UPDATE
-            // ---------------------------
             var reports = await query
                 .OrderByDescending(r =>
                     r.ChangeLogs!
@@ -65,9 +60,6 @@ namespace BugReport.Controllers
                 )
                 .ToListAsync();
 
-            // ---------------------------
-            // BUILD VIEW MODEL LIST
-            // ---------------------------
             var list = new List<ReportViewModel>();
 
             foreach (var report in reports)
@@ -76,7 +68,6 @@ namespace BugReport.Controllers
                     .OrderByDescending(cl => cl.Timestamp)
                     .FirstOrDefault();
 
-                // STATUS FILTER
                 if (statuses != null && statuses.Length > 0)
                 {
                     var latestStatus = latestChangeLog?.Status?.Name;
@@ -117,28 +108,17 @@ namespace BugReport.Controllers
 
             var reporter = await _userManager.GetUserAsync(User);
 
-            if(reporter is null)
-            {
-                temp = _localizer["not-logged-in-error"];
-                TempData["ErrorToast"] = temp;
-                return View(model);
-            }
+            if (!User.IsInRole("Student"))
+                return Forbid();
 
             var assignees = await _context.Users
             .Where(u => model.Assignees.Contains(u.Id))
             .ToListAsync();
 
-            if (!assignees.Any())
-            {
-                temp = _localizer["select-assignee-error"];
-                TempData["ErrorToast"] = temp;
-                return View(model);
-            }
-
             var report = new Report
             {
                 Id = Guid.NewGuid(),
-                ReporterId = reporter.Id,
+                ReporterId = reporter!.Id,
                 Title = model.Title,
                 Assignees = assignees,
                 Description = model.Description,
@@ -177,7 +157,7 @@ namespace BugReport.Controllers
 
             if (status is null)
             {
-                temp = _localizer["status-not-found-error"];
+                temp = _localizer["status-not-found"];
                 TempData["ErrorToast"] = temp;
                 return View(model);
             }
@@ -187,14 +167,14 @@ namespace BugReport.Controllers
                 Id = Guid.NewGuid(),
                 StatusId = status.Id,
                 UserId = reporter.Id,
-                ChangeDescription = $"{reporter.FirstName} {reporter.LastName} Created Report"
+                ChangeDescription = $"Created a new report."
             });
 
             _context.Reports.Add(report);
             await _context.SaveChangesAsync();
 
-            string text = _localizer["create-success"];
-            TempData["SuccessToast"] = text;
+            temp = _localizer["create-success"];
+            TempData["SuccessToast"] = temp;
             return RedirectToAction("Index", "Report");
         }
 
@@ -235,10 +215,12 @@ namespace BugReport.Controllers
             return View(report);
         }
 
+        [Authorize(Roles = "Instructor,Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeStatus(Guid reportId, Guid statusId)
         {
+            string temp = string.Empty;
             var user = await _userManager.GetUserAsync(User);
 
             var report = await _context.Reports
@@ -250,7 +232,7 @@ namespace BugReport.Controllers
                 return NotFound();
 
             bool isAssignee = report.Assignees.Any(a => a.Id == user!.Id);
-            bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            bool isAdmin = await _userManager.IsInRoleAsync(user!, "Admin");
 
             if (!isAssignee && !isAdmin)
                 return Forbid();
@@ -265,13 +247,16 @@ namespace BugReport.Controllers
             {
                 Id = Guid.NewGuid(),
                 ReportId = report.Id,
-                UserId = user.Id,
+                UserId = user!.Id,
                 Timestamp = DateTime.UtcNow,
                 StatusId = newStatus.Id,
-                ChangeDescription = $"{user.FirstName} {user.LastName} changed status to {newStatus.Name}"
+                ChangeDescription = $"Changed status to {newStatus.Name}."
             });
 
             await _context.SaveChangesAsync();
+
+            temp = _localizer["status-change-success"];
+            TempData["SuccessToast"] = temp;
 
             return RedirectToAction("Details", new { id = report.Id });
         }
@@ -280,6 +265,8 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Message(AddMessageViewModel model)
         {
+            string temp = string.Empty;
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -316,13 +303,16 @@ namespace BugReport.Controllers
                 ReportId = report.Id,
                 UserId = user.Id,
                 StatusId = latestStatusId,
-                ChangeDescription = "New message added",
+                ChangeDescription = "Added a new message.",
                 Timestamp = DateTime.UtcNow
             };
 
             _context.ChangeLogs.Add(changeLog);
 
             await _context.SaveChangesAsync();
+
+            temp = _localizer["message-success"];
+            TempData["SuccessToast"] = temp;
 
             // Extract initials
             string initials = $"{user.FirstName[0]}{user.LastName[0]}".ToUpper();
@@ -337,7 +327,7 @@ namespace BugReport.Controllers
             });
         }
 
-        [Authorize(Roles = "Student,Instructor")]
+        [Authorize(Roles = "Student")]
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -364,27 +354,28 @@ namespace BugReport.Controllers
                 Title = report.Title,
                 Description = report.Description,
                 Assignees = report.Assignees.Select(a => a.Id).ToList(),
-                Attachments = report.Attachments.Select(a => new AttachmentViewModel
+                Attachments = report.Attachments!.Select(a => new AttachmentViewModel
                 {
                     Id = a.Id,
                     FileName = a.FileName,
                     FilePath = a.FilePath
                 }).ToList(),
-                ExistingAttachments = report.Attachments.Select(a => a.Id).ToList(),
+                ExistingAttachments = report.Attachments!.Select(a => a.Id).ToList(),
                 RowVersion = report.RowVersion
             };
 
             return View(model);
         }
 
-        //TODO: FIX EDIT
-        [Authorize(Roles = "Student,Instructor")]
+        [Authorize(Roles = "Student")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditReportViewModel model)
         {
+            string temp = string.Empty;
+
             model.NewAttachments ??= new List<IFormFile>();
-            model.ExistingAttachments ??= new List<Guid>(); // <- ensure not-null
+            model.ExistingAttachments ??= new List<Guid>();
 
             if (!ModelState.IsValid)
             {
@@ -392,33 +383,38 @@ namespace BugReport.Controllers
                 return View(model);
             }
 
+            var user = await _userManager.GetUserAsync(User);
             var userId = _userManager.GetUserId(User);
 
             var report = await _context.Reports
                 .Include(r => r.Assignees)
                 .Include(r => r.Attachments)
-                .Include(r => r.ChangeLogs)
                 .FirstOrDefaultAsync(r => r.Id == model.Id);
 
             if (report == null)
                 return RedirectToAction("Index");
 
-            bool isReporter = report.ReporterId == userId;
-
-            if (!isReporter)
+            if (report.ReporterId != userId)
                 return Forbid();
 
             var createdFiles = new List<string>();
 
             try
             {
-                _context.Entry(report).Property(r => r.RowVersion).OriginalValue = model.RowVersion;
+                // Attach RowVersion for concurrency
+                _context.Entry(report).OriginalValues["RowVersion"] = model.RowVersion;
 
-                // --- BASIC PROPERTIES ---
+                // Mark Report as unchanged so EF doesn't auto-flag everything as modified
+                _context.Entry(report).State = EntityState.Unchanged;
+
+                // Apply only actual modified properties
                 report.Title = model.Title;
                 report.Description = model.Description;
 
-                // --- ASSIGNEES UPDATE ---
+                _context.Entry(report).Property(r => r.Title).IsModified = true;
+                _context.Entry(report).Property(r => r.Description).IsModified = true;
+
+                // --- ASSIGNEES ---
                 var newIds = model.Assignees;
                 var oldIds = report.Assignees.Select(a => a.Id).ToList();
 
@@ -427,21 +423,34 @@ namespace BugReport.Controllers
 
                 foreach (var id in toAdd)
                 {
-                    var user = await _context.Users.FindAsync(id);
-                    if (user != null) report.Assignees.Add(user);
+                    var users = await _context.Users.FindAsync(id);
+                    if (users != null)
+                        report.Assignees.Add(users);
                 }
 
                 foreach (var id in toRemove)
                 {
-                    var user = report.Assignees.First(a => a.Id == id);
-                    report.Assignees.Remove(user);
+                    var users = report.Assignees.First(a => a.Id == id);
+                    report.Assignees.Remove(users);
                 }
 
-                // --- REMOVE EXISTING ATTACHMENTS ---
-                var keep = model.ExistingAttachments ?? new List<Guid>(); // defensive
-                var remove = report.Attachments.Where(a => !keep.Contains(a.Id)).ToList();
+                // Mark only the Assignees navigation as modified
+                _context.Entry(report).Collection(r => r.Assignees).IsModified = true;
 
-                foreach (var att in remove)
+                // --- FIRST SAVE: only update basic report data ---
+                await _context.SaveChangesAsync();
+
+
+
+                //
+                // 📌 ATTACHMENT OPERATIONS (do NOT affect RowVersion now)
+                //
+
+                // --- Remove attachments ---
+                var keep = model.ExistingAttachments;
+                var toDelete = report.Attachments!.Where(a => !keep.Contains(a.Id)).ToList();
+
+                foreach (var att in toDelete)
                 {
                     if (System.IO.File.Exists(att.FilePath))
                         System.IO.File.Delete(att.FilePath);
@@ -449,8 +458,8 @@ namespace BugReport.Controllers
                     _context.Attachments.Remove(att);
                 }
 
-                // --- ADD NEW ATTACHMENTS ---
-                if (model.NewAttachments != null && model.NewAttachments.Any())
+                // --- Add new attachments ---
+                if (model.NewAttachments.Any())
                 {
                     var uploadPath = Path.Combine("wwwroot", "uploads", "reports", report.Id.ToString());
                     Directory.CreateDirectory(uploadPath);
@@ -461,17 +470,17 @@ namespace BugReport.Controllers
                         var fileName = fileId + Path.GetExtension(file.FileName);
                         var filePath = Path.Combine(uploadPath, fileName);
 
-                        // write file and remember created path for cleanup on error
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
                             await file.CopyToAsync(stream);
                         }
 
-                        createdFiles.Add(filePath); // <-- track created files
+                        createdFiles.Add(filePath);
 
-                        report.Attachments.Add(new Attachment
+                        _context.Attachments.Add(new Attachment
                         {
                             Id = fileId,
+                            ReportId = report.Id,
                             FileName = fileName,
                             FilePath = filePath
                         });
@@ -491,32 +500,35 @@ namespace BugReport.Controllers
                     UserId = userId!,
                     StatusId = lastStatusId,
                     Timestamp = DateTime.UtcNow,
-                    ChangeDescription = "Status updated"
+                    ChangeDescription = "Updated the report."
                 });
+
 
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessToast"] = "Report updated successfully.";
+                temp = _localizer["edit-success"];
+                TempData["SuccessToast"] = temp;
                 return RedirectToAction("Details", new { id = report.Id });
             }
             catch (DbUpdateConcurrencyException)
             {
-                // cleanup files created during this request
                 foreach (var f in createdFiles)
-                    if (System.IO.File.Exists(f)) System.IO.File.Delete(f);
+                    if (System.IO.File.Exists(f))
+                        System.IO.File.Delete(f);
 
-                TempData["ErrorToast"] = "Concurrency conflict — please reload.";
+                temp = _localizer["edit-concurrency"];
+                TempData["ErrorToast"] = temp;
                 return RedirectToAction("Details", new { id = model.Id });
             }
             catch (Exception)
             {
-                // cleanup files created during this request
                 foreach (var f in createdFiles)
-                    if (System.IO.File.Exists(f)) System.IO.File.Delete(f);
+                    if (System.IO.File.Exists(f))
+                        System.IO.File.Delete(f);
 
-                // return the edit view so user can retry; in production log the exception
                 ViewBag.Statuses = await _context.Statuses.ToListAsync();
-                TempData["ErrorToast"] = "An error occurred while saving the report. Please try again.";
+                temp = _localizer["edit-error"];
+                TempData["ErrorToast"] = temp;
                 return View(model);
             }
         }
@@ -525,6 +537,7 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
+            string temp = string.Empty;
             var report = await _context.Reports
                 .Include(r => r.Attachments)
                 .FirstOrDefaultAsync(r => r.Id == id);
@@ -559,7 +572,8 @@ namespace BugReport.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["WarnToast"] = "Report deleted successfully.";
+            temp = _localizer["delete-success"];
+            TempData["WarnToast"] = temp;
             return RedirectToAction("Index");
         }
     }

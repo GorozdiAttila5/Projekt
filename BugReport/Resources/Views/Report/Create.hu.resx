@@ -120,26 +120,8 @@
   <data name="new-report" xml:space="preserve">
     <value>Új jelentés</value>
   </data>
-  <data name="title" xml:space="preserve">
-    <value>Cím</value>
-  </data>
-  <data name="title-placeholder" xml:space="preserve">
-    <value>Cím</value>
-  </data>
   <data name="assignees" xml:space="preserve">
     <value>Címzettek</value>
-  </data>
-  <data name="add-assignees-placeholder" xml:space="preserve">
-    <value>Címzettek hozzáadása...</value>
-  </data>
-  <data name="description" xml:space="preserve">
-    <value>Leírás</value>
-  </data>
-  <data name="description-placeholder" xml:space="preserve">
-    <value>Leírás</value>
-  </data>
-  <data name="attachments" xml:space="preserve">
-    <value>Mellékletek</value>
   </data>
   <data name="drag-and-drop" xml:space="preserve">
     <value>Húzza ide a fájlokat, vagy kattintson a böngészéshez</value>
@@ -150,28 +132,7 @@
   <data name="cancel" xml:space="preserve">
     <value>Mégse</value>
   </data>
-  <data name="title-required-error" xml:space="preserve">
-    <value>A cím megadása kötelező</value>
-  </data>
-  <data name="title-maxlength-error" xml:space="preserve">
-    <value>A cím nem haladhatja meg a 125 karaktert</value>
-  </data>
-  <data name="assignees-required-error" xml:space="preserve">
-    <value>Adjon meg legalább egy címzettet</value>
-  </data>
-  <data name="description-required-error" xml:space="preserve">
-    <value>A leírás megadása kötelező</value>
-  </data>
-  <data name="not-logged-in-error" xml:space="preserve">
-    <value>Be kell jelentkeznie</value>
-  </data>
-  <data name="select-assignee-error" xml:space="preserve">
-    <value>Válasszon legalább egy felelőst</value>
-  </data>
-  <data name="status-not-found-error" xml:space="preserve">
-    <value>Az alapértelmezett állapot nem található</value>
-  </data>
-  <data name="create-success" xml:space="preserve">
-    <value>A jelentés sikeresen létrehozva</value>
+  <data name="add-assignees-placeholder" xml:space="preserve">
+    <value>Címzettek hozzáadása...</value>
   </data>
 </root>

@@ -5,19 +5,20 @@ namespace BugReport.Models.Report
 
     public class CreateReportViewModel
     {
-        [Required(ErrorMessage = "{0} is required")]
-        [MaxLength(125, ErrorMessage = "The {0} cannot exceed {1} charaters")]
-        [Display(Name = "Title", Prompt = "Title")]
+        [Required(ErrorMessage = "title-required")]
+        [MaxLength(125, ErrorMessage = "title-regex")]
+        [Display(Name = "title", Prompt = "title")]
         public required string Title { get; set; }
 
-        [Required(ErrorMessage = "Please give atleat one assignee")]
+        [Required(ErrorMessage = "assignee-required")]
+        [Display(Name = "assignee", Prompt = "Assignee")]
         public required List<string> Assignees { get; set; }
 
-        [Required(ErrorMessage = "{0} is required")]
-        [Display(Name = "Desctiption", Prompt = "Description")]
+        [Required(ErrorMessage = "description-required")]
+        [Display(Name = "description", Prompt = "description")]
         public required string Description { get; set; }
 
-        [Display(Name = "Attachments", Prompt = "Attachments")]
+        [Display(Name = "attachments", Prompt = "attachments")]
         public List<IFormFile>? Attachments { get; set; }
     }
 }

@@ -11,12 +11,12 @@
     <form asp-controller="Report" asp-action="Create" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         <div class="mb-3">
-            <label asp-for="Title" class="form-label fw-bold">@localizer["title"]</label>
-            <input asp-for="Title" class="form-control" placeholder="@localizer["title-placeholder"]" />
+            <label asp-for="Title" class="form-label fw-bold"></label>
+            <input asp-for="Title" class="form-control" />
             <span asp-validation-for="Title" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label asp-for="Assignees" class="form-label fw-bold">@localizer["assignees"]</label>
+            <label asp-for="Assignees" class="form-label fw-bold"></label>
             <div class="assignee-selector dropdown">
                 <div id="assignee-tag-container" class="form-control d-flex flex-wrap
             align-items-center gap-2 position-relative" style="min-height: 42px; cursor: text" data-placeholder="@localizer["add-assignees-placeholder"]">
@@ -31,12 +31,12 @@
             <span asp-validation-for="Assignees" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label asp-for="Description" class="form-label fw-bold">@localizer["description"]</label>
-            <textarea asp-for="Description" class="form-control" rows="7" style="resize:none" placeholder="@localizer["description-placeholder"]"></textarea>
+            <label asp-for="Description" class="form-label fw-bold"></label>
+            <textarea asp-for="Description" class="form-control" rows="7" style="resize:none"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label asp-for="Attachments" class="form-label fw-bold">@localizer["attachments"]</label>
+            <label asp-for="Attachments" class="form-label fw-bold"></label>
             <div id="file-dropzone" class="drop-zone border rounded bg-white p-4 text-center">
                 <p class="text-muted">@localizer["drag-and-drop"]</p>
                 <input asp-for="Attachments" type="file" id="file-input" class="d-none" multiple />
@@ -54,5 +54,5 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
     }
-    <script src="~/js/report.js"></script>
+    <script src="~/js/create-report.js"></script>
 }
