@@ -134,8 +134,18 @@ namespace BugReport.Controllers
                 foreach (var file in model.Attachments)
                 {
                     var fileId = Guid.NewGuid();
-                    var fileName = fileId + Path.GetExtension(file.FileName);
+                    var fileName = Path.GetFileName(file.FileName);
                     var filePath = Path.Combine(uploadPath, fileName);
+
+                    var fileCounter = 1;
+                    while (System.IO.File.Exists(filePath))
+                    {
+                        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                        var extension = Path.GetExtension(file.FileName);
+                        fileName = $"{fileNameWithoutExtension} ({fileCounter}){extension}";
+                        filePath = Path.Combine(uploadPath, fileName);
+                        fileCounter++;
+                    }
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
@@ -167,7 +177,7 @@ namespace BugReport.Controllers
                 Id = Guid.NewGuid(),
                 StatusId = status.Id,
                 UserId = reporter.Id,
-                ChangeDescription = $"Created a new report."
+                ChangeDescription = "Created a new report."
             });
 
             _context.Reports.Add(report);
@@ -250,7 +260,7 @@ namespace BugReport.Controllers
                 UserId = user!.Id,
                 Timestamp = DateTime.UtcNow,
                 StatusId = newStatus.Id,
-                ChangeDescription = $"Changed status to {newStatus.Name}."
+                ChangeDescription = "Changed the report's status."
             });
 
             await _context.SaveChangesAsync();
@@ -440,12 +450,6 @@ namespace BugReport.Controllers
                 // --- FIRST SAVE: only update basic report data ---
                 await _context.SaveChangesAsync();
 
-
-
-                //
-                // 📌 ATTACHMENT OPERATIONS (do NOT affect RowVersion now)
-                //
-
                 // --- Remove attachments ---
                 var keep = model.ExistingAttachments;
                 var toDelete = report.Attachments!.Where(a => !keep.Contains(a.Id)).ToList();
@@ -467,8 +471,18 @@ namespace BugReport.Controllers
                     foreach (var file in model.NewAttachments)
                     {
                         var fileId = Guid.NewGuid();
-                        var fileName = fileId + Path.GetExtension(file.FileName);
+                        var fileName = Path.GetFileName(file.FileName);
                         var filePath = Path.Combine(uploadPath, fileName);
+
+                        var fileCounter = 1;
+                        while (System.IO.File.Exists(filePath))
+                        {
+                            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                            var extension = Path.GetExtension(file.FileName);
+                            fileName = $"{fileNameWithoutExtension} ({fileCounter}){extension}";
+                            filePath = Path.Combine(uploadPath, fileName);
+                            fileCounter++;
+                        }
 
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {

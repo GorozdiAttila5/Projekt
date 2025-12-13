@@ -138,4 +138,7 @@
   <data name="edit-error" xml:space="preserve">
     <value>Error editing report</value>
   </data>
+  <data name="message-success" xml:space="preserve">
+    <value>Message added successfully</value>
+  </data>
 </root>

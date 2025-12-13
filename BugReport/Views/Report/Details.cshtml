@@ -265,7 +265,8 @@
                     {
                         Time = log.Timestamp,
                         User = log.User,
-                        Text = log.ChangeDescription
+                        Text = log.ChangeDescription,
+                        Stat = log.Status
                     })
                     .OrderBy(t => t.Time)
                     .ToList();
@@ -289,7 +290,12 @@
                                         <span class="text-muted">@t.Time.ToString("g")</span>
                                     </div>
 
-                                    <div class="activity-box">@t.Text</div>
+                                    <div class="activity-box">
+                                        @GetLocalizedActivity(t.Text, localizer)
+                                        <span class="badge float-end @GetStatusBadgeClass(t.Stat.NormalizedName)">
+                                            @GetLocalizedStatusName(t.Stat.Name, localizer)
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -322,6 +328,18 @@
             "Rejected" => localizer["status-rejected"].Value,
             "Blocked" => localizer["status-blocked"].Value,
             _ => status
+        };
+    }
+
+    public string GetLocalizedActivity(string activity, IViewLocalizer localizer)
+    {
+        return activity switch
+        {
+            "Created a new report." => localizer["report-created"].Value,
+            "Changed the report's status." => localizer["report-status-changed"].Value,
+            "Updated the report." => localizer["report-updated"].Value,
+            "Added a new message." => localizer["report-message-added"].Value,
+            _ => activity
         };
     }
 

@@ -198,4 +198,16 @@
   <data name="update-status" xml:space="preserve">
     <value>Állapot frissítése</value>
   </data>
+  <data name="report-created" xml:space="preserve">
+    <value>Új jelentést hozott létre.</value>
+  </data>
+  <data name="report-updated" xml:space="preserve">
+    <value>Módosította a jelentést.</value>
+  </data>
+  <data name="report-status-changed" xml:space="preserve">
+    <value>Módosította a jelentés státuszát.</value>
+  </data>
+  <data name="report-message-added" xml:space="preserve">
+    <value>Új megjegyzést adott hozzá.</value>
+  </data>
 </root>

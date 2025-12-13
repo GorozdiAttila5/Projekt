@@ -198,4 +198,16 @@
   <data name="update-status" xml:space="preserve">
     <value>Update status</value>
   </data>
+  <data name="report-created" xml:space="preserve">
+    <value>Created a new report.</value>
+  </data>
+  <data name="report-updated" xml:space="preserve">
+    <value>Updated the report.</value>
+  </data>
+  <data name="report-status-changed" xml:space="preserve">
+    <value>Changed the report's status.</value>
+  </data>
+  <data name="report-message-added" xml:space="preserve">
+    <value>Added a new message.</value>
+  </data>
 </root>
