@@ -34,14 +34,6 @@
                 </div>
 
             </div>
-            @if (User.IsInRole("Student"))
-            {
-                <div class="col-auto ms-auto">
-                    <a asp-controller="Report" asp-action="Create" class="btn btn-dark-blue px-4 py-2">
-                        @localizer["new-report"]
-                    </a>
-                </div>
-            }
         </div>
     </form>
 

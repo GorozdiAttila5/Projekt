@@ -210,4 +210,10 @@
   <data name="report-message-added" xml:space="preserve">
     <value>Added a new message.</value>
   </data>
+  <data name="archive" xml:space="preserve">
+    <value>Archive report</value>
+  </data>
+  <data name="unarchive" xml:space="preserve">
+    <value>Restore report</value>
+  </data>
 </root>

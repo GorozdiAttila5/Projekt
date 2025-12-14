@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BugReport.Entities.BugReport.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace BugReport.Entities
 {
@@ -19,7 +20,26 @@ namespace BugReport.Entities
         public ICollection<Attachment>? Attachments { get; set; }
         public ICollection<Message>? Messages { get; set; }
 
+        public ICollection<ReportArchive>? ArchivedByUsers { get; set; }
+
         [Timestamp]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
+
+    namespace BugReport.Entities
+    {
+        public class ReportArchive
+        {
+            public Guid Id { get; set; }
+
+            public Guid ReportId { get; set; }
+            public Report Report { get; set; } = default!;
+
+            public string UserId { get; set; } = default!;
+            public User User { get; set; } = default!;
+
+            public DateTime ArchivedAt { get; set; } = DateTime.UtcNow;
+        }
+    }
+
 }

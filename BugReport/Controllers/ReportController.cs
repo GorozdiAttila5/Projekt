@@ -1,15 +1,13 @@
 ﻿using BugReport.Data;
 using BugReport.Entities;
+using BugReport.Entities.BugReport.Entities;
 using BugReport.Models.Report;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
-using System;
 using System.Data;
-using System.Security.Cryptography.Xml;
 
 namespace BugReport.Controllers
 {
@@ -38,7 +36,9 @@ namespace BugReport.Controllers
             var userId = _userManager.GetUserId(User);
 
             var query = _context.Reports
-                .Where(r => r.ReporterId == userId || r.Assignees.Any(a => a.Id == userId || User.IsInRole("Admin")))
+                .Where(r =>
+                    (r.ReporterId == userId || r.Assignees.Any(a => a.Id == userId) || User.IsInRole("Admin"))
+                    && !r.ArchivedByUsers!.Any(a => a.UserId == userId))
                 .Include(r => r.Reporter)
                 .Include(r => r.ChangeLogs)!.ThenInclude(cl => cl.Status)
                 .AsNoTracking()
@@ -191,6 +191,8 @@ namespace BugReport.Controllers
         [HttpGet]
         public IActionResult Details(Guid id)
         {
+            var userId = _userManager.GetUserId(User);
+
             var report = _context.Reports
                 .Where(r => r.Id == id)
                 .Include(r => r.Reporter)
@@ -217,6 +219,9 @@ namespace BugReport.Controllers
 
             if (report == null)
                 return RedirectToAction("Index");
+
+            ViewBag.IsArchived = _context.ReportArchives
+                .Any(a => a.ReportId == id && a.UserId == userId);
 
             ViewBag.Statuses = _context.Statuses
                 .OrderBy(s => s.Id)
@@ -275,8 +280,6 @@ namespace BugReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Message(AddMessageViewModel model)
         {
-            string temp = string.Empty;
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -320,9 +323,6 @@ namespace BugReport.Controllers
             _context.ChangeLogs.Add(changeLog);
 
             await _context.SaveChangesAsync();
-
-            temp = _localizer["message-success"];
-            TempData["SuccessToast"] = temp;
 
             // Extract initials
             string initials = $"{user.FirstName[0]}{user.LastName[0]}".ToUpper();
@@ -545,6 +545,111 @@ namespace BugReport.Controllers
                 TempData["ErrorToast"] = temp;
                 return View(model);
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Archive(Guid reportId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var exists = await _context.ReportArchives
+                .AnyAsync(a => a.ReportId == reportId && a.UserId == userId);
+
+            if (!exists)
+            {
+                _context.ReportArchives.Add(new ReportArchive
+                {
+                    ReportId = reportId,
+                    UserId = userId!
+                });
+
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["SuccessToast"] = _localizer["archive-success"].Value;
+            return RedirectToAction("Details", new { id = reportId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unarchive(Guid reportId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var archive = await _context.ReportArchives
+                .FirstOrDefaultAsync(a => a.ReportId == reportId && a.UserId == userId);
+
+            if (archive != null)
+            {
+                _context.ReportArchives.Remove(archive);
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["SuccessToast"] = _localizer["unarchive-success"].Value;
+            return RedirectToAction("Details", new { id = reportId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Archive(string? search, string[]? statuses)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var query = _context.Reports
+                .Where(r =>
+                    (r.ReporterId == userId || r.Assignees.Any(a => a.Id == userId) || User.IsInRole("Admin"))
+                    && r.ArchivedByUsers!.Any(a => a.UserId == userId))
+                .Include(r => r.Reporter)
+                .Include(r => r.ChangeLogs)!.ThenInclude(cl => cl.Status)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(r => r.Title.ToLower().Contains(search));
+            }
+
+            var reports = await query
+                .OrderByDescending(r =>
+                    r.ChangeLogs!
+                        .OrderByDescending(cl => cl.Timestamp)
+                        .Select(cl => (DateTime?)cl.Timestamp)
+                        .FirstOrDefault()
+                    ?? r.CreatedAt
+                )
+                .ToListAsync();
+
+            var list = new List<ReportViewModel>();
+
+            foreach (var report in reports)
+            {
+                var latestChangeLog = report.ChangeLogs?
+                    .OrderByDescending(cl => cl.Timestamp)
+                    .FirstOrDefault();
+
+                if (statuses != null && statuses.Length > 0)
+                {
+                    var latestStatus = latestChangeLog?.Status?.Name;
+
+                    if (latestStatus == null || !statuses.Contains(latestStatus))
+                        continue;
+                }
+
+                list.Add(new ReportViewModel
+                {
+                    Report = report,
+                    LatestChangeLog = latestChangeLog
+                });
+            }
+
+            ViewBag.Statuses = await _context.Statuses
+                .Select(s => s.Name)
+                .ToListAsync();
+
+            ViewBag.SelectedStatuses = statuses ?? Array.Empty<string>();
+
+            return View(list);
         }
 
         [HttpPost]

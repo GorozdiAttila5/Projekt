@@ -550,3 +550,27 @@ body {
     opacity: .85;
     padding: .75rem 1rem;
 }
+
+.title-cell {
+    max-width: 250px;
+    position: relative;
+}
+
+.report-title {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-right: 80px; /* space for the badge */
+}
+
+.report-title-wrapper {
+    max-width: 75%;
+}
+
+.report-title {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

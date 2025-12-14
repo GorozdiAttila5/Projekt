@@ -141,4 +141,10 @@
   <data name="message-success" xml:space="preserve">
     <value>Message added successfully</value>
   </data>
+  <data name="archive-success" xml:space="preserve">
+    <value>Report archived successfully</value>
+  </data>
+  <data name="unarchive-success" xml:space="preserve">
+    <value>Report restored successfully</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,22 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="archived-report" xml:space="preserve">
-    <value>Archívum</value>
+  <data name="reports" xml:space="preserve">
+    <value>Archivált jelentések</value>
   </data>
-  <data name="dashboard" xml:space="preserve">
-    <value>Irányítópult</value>
+  <data name="search-reports-placeholder" xml:space="preserve">
+    <value>Jelentések keresése...</value>
   </data>
-  <data name="logout" xml:space="preserve">
-    <value>Kijelentkezés</value>
+  <data name="filter-status" xml:space="preserve">
+    <value>Állapot szűrése</value>
   </data>
-  <data name="menu" xml:space="preserve">
-    <value>Menü</value>
+  <data name="filter" xml:space="preserve">
+    <value>Szűrés</value>
   </data>
   <data name="new-report" xml:space="preserve">
     <value>Új jelentés</value>
   </data>
-  <data name="report" xml:space="preserve">
-    <value>Jelentések</value>
+  <data name="from" xml:space="preserve">
+    <value>Feladó</value>
+  </data>
+  <data name="title" xml:space="preserve">
+    <value>Cím</value>
+  </data>
+  <data name="modified" xml:space="preserve">
+    <value>Módosítva</value>
+  </data>
+  <data name="unknown" xml:space="preserve">
+    <value>Ismeretlen</value>
+  </data>
+  <data name="no-report-found" xml:space="preserve">
+    <value>Nincs találat</value>
+  </data>
+  <data name="status-incoming" xml:space="preserve">
+    <value>Beérkezett</value>
+  </data>
+  <data name="status-in-progress" xml:space="preserve">
+    <value>Folyamatban</value>
+  </data>
+  <data name="status-resolved" xml:space="preserve">
+    <value>Megoldva</value>
+  </data>
+  <data name="status-rejected" xml:space="preserve">
+    <value>Elutasítva</value>
+  </data>
+  <data name="status-blocked" xml:space="preserve">
+    <value>Zárolva</value>
   </data>
 </root>

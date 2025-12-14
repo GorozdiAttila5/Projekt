@@ -141,4 +141,10 @@
   <data name="message-success" xml:space="preserve">
     <value>Üzenet sikeresen elküldve</value>
   </data>
+  <data name="archive-success" xml:space="preserve">
+    <value>A jelentés sikeresen archiválva</value>
+  </data>
+  <data name="unarchive-success" xml:space="preserve">
+    <value>A jelentés sikeresen visszaállítva</value>
+  </data>
 </root>

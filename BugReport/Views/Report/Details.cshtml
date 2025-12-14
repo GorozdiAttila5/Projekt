@@ -15,8 +15,10 @@
 <div class="main-card">
 
     <div class="d-flex justify-content-between align-items-start flex-column flex-md-row mb-4">
-        <div>
-            <h3 class="fw-bold mb-1">@Model.Report.Title</h3>
+        <div class="report-title-wrapper">
+            <h3 class="fw-bold mb-1 report-title" title="@Model.Report.Title">
+                @Model.Report.Title
+            </h3>
 
             @if (Model.LatestChangeLog?.Status is Status status)
             {
@@ -43,8 +45,12 @@
                 <select name="statusId" class="form-select w-auto">
                     @foreach (var status in ViewBag.Statuses)
                     {
-                        <option value="@status.Id"
-                                selected="@(Model.LatestChangeLog?.Status?.Id == status.Id)">
+                        if (status.NormalizedName == "INCOMING" && Model.LatestChangeLog?.Status.NormalizedName != "INCOMING")
+                        {
+                            continue;
+                        }
+
+                        <option value="@status.Id" selected="@(Model.LatestChangeLog?.Status?.Id == status.Id)">
                             @GetLocalizedStatusName(status.Name, localizer)
                         </option>
                     }
@@ -302,6 +308,24 @@
                     </div>
                 }
 
+                <div class="mt-2 text-center">
+                    @if ((bool)ViewBag.IsArchived)
+                    {
+                        <form asp-action="Unarchive" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="reportId" value="@Model.Report.Id" />
+                            <button class="btn btn-dark-blue w-100">@localizer["unarchive"]</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Archive" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="reportId" value="@Model.Report.Id" />
+                            <button class="btn btn-dark-blue w-100">@localizer["archive"]</button>
+                        </form>
+                    }
+                </div>
             </div>
         </div>
     </div>

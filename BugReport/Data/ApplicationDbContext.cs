@@ -1,6 +1,8 @@
 ﻿using BugReport.Entities;
+using BugReport.Entities.BugReport.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace BugReport.Data
 {
@@ -11,6 +13,7 @@ namespace BugReport.Data
         public DbSet<ChangeLog> ChangeLogs { get; set; } = null!;
         public DbSet<Attachment> Attachments { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
+        public DbSet<ReportArchive> ReportArchives { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -65,6 +68,16 @@ namespace BugReport.Data
                 .WithMany(u => u.Messages)
                 .HasForeignKey(m => m.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ReportArchive>()
+                .HasOne(ra => ra.Report)
+                .WithMany(r => r.ArchivedByUsers)
+                .HasForeignKey(ra => ra.ReportId);
+
+            builder.Entity<ReportArchive>()
+                .HasOne(ra => ra.User)
+                .WithMany(u => u.ArchivedReports)
+                .HasForeignKey(ra => ra.UserId);
         }
     }
 }

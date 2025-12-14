@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BugReport.Entities.BugReport.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace BugReport.Entities
 {
@@ -9,6 +10,7 @@ namespace BugReport.Entities
 
         public ICollection<Report>? ReportsReported {  get; set; }
         public ICollection<Report>? ReportsAssigned { get; set; }
+        public ICollection<ReportArchive>? ArchivedReports { get; set; }
         public ICollection<ChangeLog>? ChangeLogs { get; set; }
         public ICollection<Message>? Messages { get; set; }
     }

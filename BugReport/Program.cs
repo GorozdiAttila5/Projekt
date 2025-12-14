@@ -33,9 +33,12 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         .AddSupportedUICultures(supportedCultures);
 });
 
+
 builder.Services.ConfigureDatabaseContext(builder.Configuration);
 
 builder.Services.ConfigureIdentity();
+
+builder.Services.AddHostedService<ReportAutoArchiveService>();
 
 var app = builder.Build();
 

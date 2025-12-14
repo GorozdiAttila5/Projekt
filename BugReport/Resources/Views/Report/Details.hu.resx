@@ -210,4 +210,10 @@
   <data name="report-message-added" xml:space="preserve">
     <value>Új megjegyzést adott hozzá.</value>
   </data>
+  <data name="archive" xml:space="preserve">
+    <value>Jelentés archiválása</value>
+  </data>
+  <data name="unarchive" xml:space="preserve">
+    <value>Jelentés visszaállítása</value>
+  </data>
 </root>

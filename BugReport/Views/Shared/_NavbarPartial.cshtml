@@ -42,8 +42,19 @@
         </div>
     }
 
+    @if (User.IsInRole("Student"))
+    {
+        <div class="p-3 align-content-center">
+            <a class="nav-link text-dark d-block mb-2" asp-controller="Report" asp-action="Create">@localizer["new-report"]</a>
+        </div>
+    }
+
     <div class="p-3 align-content-center">
         <a class="nav-link text-dark d-block mb-2" asp-controller="Report" asp-action="Index">@localizer["report"]</a>
+    </div>
+
+    <div class="p-3 align-content-center">
+        <a class="nav-link text-dark d-block mb-2" asp-controller="Report" asp-action="Archive">@localizer["archived-report"]</a>
     </div>
 
     <div class="language-selector mt-auto p-3">

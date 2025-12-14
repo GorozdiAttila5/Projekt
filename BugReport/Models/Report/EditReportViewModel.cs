@@ -13,7 +13,7 @@ namespace BugReport.Models.Report
 
 
         [MinLength(1, ErrorMessage = "assignee-required")]
-        [Display(Name = "assignee", Prompt = "Assignee")]
+        [Display(Name = "assignee", Prompt = "assignee")]
         public List<string> Assignees { get; set; } = new();
 
         [Required(ErrorMessage = "description-required")]
